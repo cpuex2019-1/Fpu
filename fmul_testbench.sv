@@ -1,15 +1,9 @@
-// xvlog --sv fadd_testbench.sv fadd.v
-// xelab -debug typical fadd_testbench -s fadd_testbench.sim
-// xsim --runall fadd_testbench.sim
-
 `timescale 1ns / 100ps
 `default_nettype none
 
-
-
-module fadd_testbench();
+module fmul_testbench();
    wire [31:0] x1,x2,y;
-   wire        ovf;
+   wire        ovf,udf,c;
    logic [31:0] x1i,x2i;
    shortreal    fx1,fx2,fy;
    int          i,j,k,it,jt;
@@ -22,22 +16,33 @@ module fadd_testbench();
    bit 	      fovf;
    bit 	      checkovf;
 
-   // FIXME:
    wire [0:0] sign_x1, sign_x2;
    wire [7:0] exponent_x1, exponent_x2;
    wire [22:0] mantissa_x1, mantissa_x2;
-   logic [31:0] random;
+   wire [7:0] tmp1, tmp2;   
 
+   assign {sign_x1, exponent_x1, mantissa_x1} = x1i;
+   assign {sign_x2, exponent_x2, mantissa_x2} = x2i;
+
+   assign tmp1 = 
+      exponent_x1 > 8'b11000000 ?
+          exponent_x1 - 8'b01000000
+      : (exponent_x1 < 8'b01000000 ?
+          exponent_x1 + 8'b01000000
+      : exponent_x1);
+   assign tmp2 = 
+      exponent_x2 > 8'b11000000 ?
+          exponent_x2 - 8'b01000000
+      : (exponent_x2 < 8'b01000000 ?
+          exponent_x2 + 8'b01000000
+      : exponent_x2);
+
+   // assign x1 = {sign_x1, tmp1, mantissa_x1};
+   // assign x2 = {sign_x2, tmp2, mantissa_x2};
    assign x1 = x1i;
    assign x2 = x2i;
 
-   assign {sign_x1, exponent_x1, mantissa_x1} = x1i;
-   assign sign_x2 = random[31:31];
-   assign exponent_x2 = exponent_x1 + {6'b0, random[25:23]};
-   assign mantissa_x2 = random[22:0];
-   assign x2i = {sign_x2, exponent_x2, mantissa_x2};
-   
-   fadd u1(x1,x2,y,ovf);
+   fmul u1(x1,x2,y,c,ovf,udf);
 
    initial begin
       // $dumpfile("test_fadd.vcd");
@@ -51,32 +56,32 @@ module fadd_testbench();
       $display("fadd : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
 
       for (i=0; i<100; i++) begin
-         x1i = $urandom();
-         // random = $urandom();
-         
+
+         x1i = $urandom();         
          x2i = $urandom();
 
          fx1 = $bitstoshortreal(x1i);
          fx2 = $bitstoshortreal(x2i);
-         fy = fx1 + fx2;
+         fy = fx1 * fx2;
          fybit = $shortrealtobits(fy);
 
-         checkovf = i < 255 && j < 255;
-         if ( checkovf && fybit[30:23] == 255 ) begin
-            fovf = 1;
-         end else begin
-            fovf = 0;
-         end
+         // checkovf = i < 255 && j < 255;
+         // if ( checkovf && fybit[30:23] == 255 ) begin
+         //    fovf = 1;
+         // end else begin
+         //    fovf = 0;
+         // end
                         
          #1;
 
-         if (y !== fybit || ovf !== fovf) begin
+         // if (y !== fybit || ovf !== fovf ) begin
             $display("x1 = %b %b %b, %3d", x1[31], x1[30:23], x1[22:0], x1[30:23]);
             $display("x2 = %b %b %b, %3d", x2[31], x2[30:23], x2[22:0], x2[30:23]);
-            $display("%e + %e = %e", $bitstoshortreal(x1), $bitstoshortreal(x2), fy);
-            $display("%e %b,%3d,%b %b", fy, fybit[31], fybit[30:23], fybit[22:0], fovf);
-            $display("%e %b,%3d,%b %b\n", $bitstoshortreal(y), y[31], y[30:23], y[22:0], ovf);
-         end
+            $display("y = %b %3d %b carry(%b) over(%b) under(%b)", y[31], y[30:23], y[22:0], c, ovf, udf);
+            $display("%e * %e = %e", $bitstoshortreal(x1), $bitstoshortreal(x2), $bitstoshortreal(y));
+            $display("fy(correct) = %b,%3d,%b %b", fybit[31], fybit[30:23], fybit[22:0], fovf);
+            $display("%e * %e = %e\n", fx1, fx2, fy);
+         // end
       end
 
       // for (i=0; i<256; i++) begin
@@ -126,24 +131,30 @@ module fadd_testbench();
 
       //                   fx1 = $bitstoshortreal(x1i);
       //                   fx2 = $bitstoshortreal(x2i);
-      //                   fy = fx1 + fx2;
+      //                   fy = fx1 * fx2;
       //                   fybit = $shortrealtobits(fy);
 
-      //                   checkovf = i < 255 && j < 255;
-      //                   if ( checkovf && fybit[30:23] == 255 ) begin
-      //                      fovf = 1;
-      //                   end else begin
-      //                      fovf = 0;
-      //                   end
+		// 	checkovf = i < 255 && j < 255;
+		// 	if ( checkovf && fybit[30:23] == 255 ) begin
+		// 	   fovf = 1;
+		// 	end else begin
+		// 	   fovf = 0;
+		// 	end
                         
       //                   #1;
 
-      //                   if (y !== fybit || ovf !== fovf) begin
+      //                   // if (y !== fybit || ovf !== fovf) begin
+      //                   if (y !== fybit) begin
       //                      $display("x1 = %b %b %b, %3d",
 		// 		    x1[31], x1[30:23], x1[22:0], x1[30:23]);
       //                      $display("x2 = %b %b %b, %3d",
 		// 		    x2[31], x2[30:23], x2[22:0], x2[30:23]);
-      //                      $display("%e %b,%3d,%b %b", fy,
+      //                      // DEBUG:
+      //                      // $display("ps = %b, sr = %b, sl = %b, cr = %b", ps, sr, sl, cr);
+      //                      // $display("man1 = %b %b", man1[55:28], man1[27:0]);
+      //                      // $display("man2 = %b %b", man2[55:28], man2[27:0]);
+      //                      // $display("man3 = %b %b", man3[55:28], man3[27:0]);
+      //                      // $display("%e %b,%3d,%b %b", fy,
 		// 		    fybit[31], fybit[30:23], fybit[22:0], fovf);
       //                      $display("%e %b,%3d,%b %b\n", $bitstoshortreal(y),
 		// 		    y[31], y[30:23], y[22:0], ovf);
@@ -162,12 +173,6 @@ module fadd_testbench();
       //       for (s2=0; s2<2; s2++) begin
       //          for (j=0;j<23;j++) begin
       //             repeat(10) begin
-
-      // for (i=100; i<120; i++) begin
-      //    for (s1=0; s1<2; s1++) begin
-      //       for (s2=0; s2<2; s2++) begin
-      //          for (j=0;j<23;j++) begin
-      //             // repeat(10) begin
       //                #1;
 
       //                {m1,dum1} = $urandom();
@@ -210,6 +215,7 @@ module fadd_testbench();
       //       end
       //    end
       // end
+
       $display("end of checking module fadd");
       //$finish;
    end

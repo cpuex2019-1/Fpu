@@ -2,7 +2,6 @@ module fmul(
     input wire [31:0] s,
     input wire [31:0] t,
     output wire [31:0] d,
-    output wire c,
     output wire overflow,
     output wire underflow
 );
@@ -36,8 +35,6 @@ wire carry;
 
 assign one_mantissa_d_48bit = {24'b0, one_mantissa_s} * {24'b0, one_mantissa_t};
 assign carry = one_mantissa_d_48bit[47:47];
-
-assign c = carry;
 
 // 正規化する
 // 繰り上がりの有無で場合分けする

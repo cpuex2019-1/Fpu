@@ -1,0 +1,11 @@
+0.6
+2018.3
+Dec  7 2018
+00:33:28
+C:/Users/tkodera/Desktop/CPU/Fpu/fadder.v,1571027364,systemVerilog,,,,fadd,,,,,,,,
+C:/Users/tkodera/Desktop/CPU/Fpu/fdiv.v,1571042403,systemVerilog,,,,fdiv,,,,,,,,
+C:/Users/tkodera/Desktop/CPU/Fpu/fdiv_testbench.sv,1571041222,systemVerilog,,C:/Users/tkodera/Desktop/CPU/Fpu/fdiv.v,,fdiv_testbench,,,,,,,,
+C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v,1571036314,systemVerilog,,,,fmul,,,,,,,,
+C:/Users/tkodera/Desktop/CPU/Fpu/fmul_testbench.sv,1571036439,systemVerilog,,C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v,,fmul_testbench,,,,,,,,
+C:/Users/tkodera/Desktop/CPU/Fpu/test_fadd.sv,1570807303,systemVerilog,,C:/Users/tkodera/Desktop/CPU/Fpu/fadder.v,,test_fadd,,,,,,,,
+C:/Users/tkodera/Desktop/CPU/Fpu/test_fmul.sv,1571027240,systemVerilog,,C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v,,test_fmul,,,,,,,,

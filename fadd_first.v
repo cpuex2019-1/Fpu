@@ -2,25 +2,8 @@ module fadd(
     input wire [31:0] s,
     input wire [31:0] t,
     output wire [31:0] d,
-    output wire [4:0] ps,
-    output wire sr,
-    output wire [4:0] sl,
-    output wire cr,
-    output wire [55:0] man1,
-    output wire [55:0] man2,
-    output wire [55:0] man3,
     output wire overflow
 );
-
-// FIXME: overflowなどのcorner caseに対応する
-// DEBUG: 今現在のバグ一覧
-// コーナーケース
-// 加算
-// 指数部が１足りないときには仮数部はあっていそう(sr=0)
-// 指数の差が24,25のときにはやばそう
-// 減算
-// 2つの値が近いときに非正規化数になっている
- 
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
 wire [0:0] sign_s, sign_t, sign_d;
@@ -84,7 +67,6 @@ wire [4:0] pre_shift;
 wire [55:0] one_mantissa_g_56bit, one_mantissa_l_56bit, one_mantissa_d_56bit;
 
 assign relative_scale = exponent_g - exponent_l;
-// NOTE: 意味ある？これ？
 assign meaningless = relative_scale > 8'b00011001;
 assign pre_shift = meaningless ? 5'b11111 : relative_scale[4:0];
 
@@ -96,8 +78,6 @@ assign one_mantissa_l_56bit = {one_mantissa_l, 31'b0} >> pre_shift;
 // 減算のときのためにulp, guard bit, round bitを設定しておく
 // carry + 1. + mantissa + 31bit
 
-// DEBUG:
-// 末尾にsticky bitを追加した
 wire [27:0] one_mantissa_g_28bit, one_mantissa_l_28bit, one_mantissa_d_28bit;
 
 assign one_mantissa_g_28bit = one_mantissa_g_56bit[55:28];
@@ -110,11 +90,6 @@ wire shift_right;
 wire [4:0] shift_left;
 wire [55:0] one_mantissa_d_scaled;
 wire [24:0] mantissa_d_scaled;
-
-// FIXME: 加算か減算かで場合分けする
-// 加算ならばcarryを見る
-// carryが出たら指数を+1して仮数を>>1する
-// assign carry = one_mantissa_d_27bit[26:26];
 
 // 減算ならば最上位から1を探す
 // それまでに出た0の数だけ<<する
@@ -149,7 +124,6 @@ assign shift_left =
     (one_mantissa_d_28bit[1:1] == 1'b1) ? 25 :
     (one_mantissa_d_28bit[0:0] == 1'b1) ? 26 : 27;
 
-
 // 正規化のためだけに56bitに拡張する
 // 正規化後は必ず下位28bitの先頭が1になる(最下位２bitは後で丸めるときに使う)
 assign one_mantissa_d_56bit =
@@ -159,17 +133,7 @@ is_add ?
 
 assign one_mantissa_d_scaled = one_mantissa_d_56bit[27:3];
 
-// DEBUG:
-assign ps = pre_shift;
-assign sr = shift_right;
-assign sl = shift_left;
-assign man1 = one_mantissa_g_56bit;
-assign man2 = one_mantissa_l_56bit;
-assign man3 = one_mantissa_d_56bit;
-
-
 // 丸めを行う
-// FIXME: 
 wire [24:0] mantissa_d_rounded; // carry + 1. + 23bit
 wire carry_round;
 
@@ -182,10 +146,7 @@ assign sticky = one_mantissa_d_56bit[0:0];
 assign flag = guard & (ulp | round | sticky);
 assign mantissa_d_rounded = one_mantissa_d_scaled + {24'b0, flag};
 
-// DEBUG:
 assign carry_round = mantissa_d_rounded[24:24];
-assign cr = carry_round;
-
 
 // NOTE: 例外処理をしていく
 // IEEE 754
@@ -197,7 +158,6 @@ assign cr = carry_round;
 // inf + inf = inf (as is negative case)
 // inf - inf = NaN
 // Nan +/- * = NaN (as is the reverse)
-
 
 assign exponent_d =
 is_add ? 
