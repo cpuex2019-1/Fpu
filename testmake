@@ -1,6 +1,0 @@
-run:
-	xvlog --sv test_fadd.sv float.sv
-	xelab -debug typical test_fadd -s test_fadd.sim
-	xsim --runall test_fadd.sim
-clean:
-	rm -rf xsim.dir

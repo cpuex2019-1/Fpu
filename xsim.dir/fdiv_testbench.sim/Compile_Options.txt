@@ -1,1 +1,0 @@
--debug "typical" "fdiv_testbench" -s "fdiv_testbench.sim" 
