@@ -1,0 +1,25 @@
+#-----------------------------------------------------------
+# xsim v2018.3 (64-bit)
+# SW Build 2405991 on Thu Dec  6 23:38:27 MST 2018
+# IP Build 2404404 on Fri Dec  7 01:43:56 MST 2018
+# Start of session at: Sat Oct 19 16:00:32 2019
+# Process ID: 12600
+# Current directory: C:/Users/tkodera/Desktop/CPU/Fpu
+# Command line: xsim.exe -mode tcl -source {xsim.dir/fadd_testbench.sim/xsim_script.tcl}
+# Log file: C:/Users/tkodera/Desktop/CPU/Fpu/xsim.log
+# Journal file: C:/Users/tkodera/Desktop/CPU/Fpu\xsim.jou
+#-----------------------------------------------------------
+source xsim.dir/fadd_testbench.sim/xsim_script.tcl
+# xsim {fadd_testbench.sim} -autoloadwcfg -runall
+Vivado Simulator 2018.3
+Time resolution is 100 ps
+run -all
+start of checking module fadd
+difference message format
+x1 = [input 1(bit)], [exponent 1(decimal)]
+x2 = [input 2(bit)], [exponent 2(decimal)]
+ref. : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)
+fadd : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)
+end of checking module fadd
+exit
+INFO: [Common 17-206] Exiting xsim at Sat Oct 19 16:00:41 2019...
