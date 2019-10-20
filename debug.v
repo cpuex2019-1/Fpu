@@ -3,18 +3,7 @@ module fmul(
     input wire [31:0] t,
     output wire [31:0] d,
     output wire overflow,
-    output wire underflow,
-    output wire c,
-    output wire de,
-    output wire [7:0] ad,
-    output wire [47:0] mul,
-    output wire [23:0] one_man,
-    output wire one_man_top,
-    output wire u,
-    output wire g,
-    output wire r,
-    output wire st,
-    output wire f
+    output wire underflow
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す

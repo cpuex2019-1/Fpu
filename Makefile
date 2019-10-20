@@ -14,7 +14,7 @@ fdiv:
 	xsim --runall fdiv_testbench.sim
 
 finv:
-	xvlog --sv finv_testbench.sv finv_first.v
+	xvlog --sv finv_testbench.sv finv_first.v debug.v fadd_second.v
 	xelab -debug typical finv_testbench -s finv_testbench.sim
 	xsim --runall finv_testbench.sim
 

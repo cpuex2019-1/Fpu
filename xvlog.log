@@ -1,5 +1,23 @@
-INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/fadd_testbench.sv" into library work
-INFO: [VRFC 10-311] analyzing module fadd_testbench
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/finv_testbench.sv" into library work
+INFO: [VRFC 10-311] analyzing module finv_testbench
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v" into library work
+INFO: [VRFC 10-311] analyzing module finv
+INFO: [VRFC 10-2458] undeclared symbol ovf, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:87]
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/debug.v" into library work
+INFO: [VRFC 10-311] analyzing module fmul
+INFO: [VRFC 10-2458] undeclared symbol de, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:39]
+INFO: [VRFC 10-2458] undeclared symbol ad, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:40]
+INFO: [VRFC 10-2458] undeclared symbol mul, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:74]
+INFO: [VRFC 10-2458] undeclared symbol c, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:120]
+INFO: [VRFC 10-2458] undeclared symbol one_man, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:140]
+INFO: [VRFC 10-2458] undeclared symbol one_man_top, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:141]
+INFO: [VRFC 10-2458] undeclared symbol u, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:143]
+INFO: [VRFC 10-2458] undeclared symbol g, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:144]
+INFO: [VRFC 10-2458] undeclared symbol r, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:145]
+INFO: [VRFC 10-2458] undeclared symbol st, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:146]
+INFO: [VRFC 10-2458] undeclared symbol f, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:147]
+INFO: [VRFC 10-2458] undeclared symbol snan, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:199]
+INFO: [VRFC 10-2458] undeclared symbol tnan, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/debug.v:200]
 INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/fadd_second.v" into library work
 INFO: [VRFC 10-311] analyzing module fadd
 INFO: [VRFC 10-2458] undeclared symbol meaningless, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/fadd_second.v:94]

@@ -1,12 +1,33 @@
 Vivado Simulator 2018.3
 Copyright 1986-1999, 2001-2018 Xilinx, Inc. All Rights Reserved.
-Running: C:/Xilinx/Vivado/2018.3/bin/unwrapped/win64.o/xelab.exe -debug typical fadd_testbench -s fadd_testbench.sim 
+Running: C:/Xilinx/Vivado/2018.3/bin/unwrapped/win64.o/xelab.exe -debug typical finv_testbench -s finv_testbench.sim 
 Multi-threading is on. Using 10 slave threads.
 Starting static elaboration
+WARNING: [VRFC 10-3091] actual bit length 48 differs from formal bit length 32 for port 'x1' [C:/Users/tkodera/Desktop/CPU/Fpu/finv_testbench.sv:25]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:47]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:49]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:50]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:53]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:55]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:56]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:59]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:61]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:62]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:65]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:67]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:68]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:71]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:73]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:74]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:77]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:79]
+WARNING: [VRFC 10-3645] port 'overflow' remains unconnected for this instance [C:/Users/tkodera/Desktop/CPU/Fpu/finv_first.v:80]
 Completed static elaboration
 Starting simulation data flow analysis
 Completed simulation data flow analysis
 Time Resolution for simulation is 100ps
+Compiling module work.fmul
 Compiling module work.fadd
-Compiling module work.fadd_testbench
-Built simulation snapshot fadd_testbench.sim
+Compiling module work.finv
+Compiling module work.finv_testbench
+Built simulation snapshot finv_testbench.sim
