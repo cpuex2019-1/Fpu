@@ -2,13 +2,13 @@ module finv(
     input wire [31:0] s,
     output wire [31:0] d,
     output wire overflow,
-    output wire underflow,
-    output wire [31:0] x1,
-    output wire [31:0] x2,
-    output wire [31:0] x3,
-    output wire [31:0] x4,
-    output wire [31:0] x5,
-    output wire [31:0] x6
+    output wire underflow
+    // output wire [31:0] x1,
+    // output wire [31:0] x2,
+    // output wire [31:0] x3,
+    // output wire [31:0] x4,
+    // output wire [31:0] x5,
+    // output wire [31:0] x6
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -32,8 +32,8 @@ assign exponent_d = 8'd253 - exponent_s;
 
 // 仮数を決める
 // wire [31:0] oms;
-// wire [49:0] x0, x1, x2, x3, x4, x5, x6;
-wire [31:0] x0;
+wire [31:0] x0, x1, x2, x3, x4, x5, x6;
+// wire [31:0] x0;
 wire [31:0] a0, a1, a2, a3, a4, a5, a6;
 wire [31:0] b0, b1, b2, b3, b4, b5, b6;
 wire [31:0] c0, c1, c2, c3, c4, c5, c6;

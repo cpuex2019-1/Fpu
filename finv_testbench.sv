@@ -22,7 +22,8 @@ module finv_testbench();
    wire [47:0] opt1, opt2, opt3, opt4, opt5, opt6; 
    assign {sign_x, exponent_x, mantissa_x} = x2i;
    assign x = x2i;
-   finv u1(x,y,ovf,udf,opt1,opt2,opt3,opt4,opt5,opt6);
+   finv u1(x,y,ovf,udf);
+   // finv u1(x,y,ovf,udf,opt1,opt2,opt3,opt4,opt5,opt6);
 
    initial begin
       // $dumpfile("test_fadd.vcd");
@@ -57,12 +58,12 @@ module finv_testbench();
 
          if (y !== fybit) begin
             $display("x1 = %b %b %b, %3d", x[31], x[30:23], x[22:0], x[30:23]);
-            $display("%b %b %b %b", opt1[31:24], opt1[23:16], opt1[15:8], opt1[7:0]);
-            $display("%b %b %b %b", opt2[31:24], opt2[23:16], opt2[15:8], opt2[7:0]);
-            $display("%b %b %b %b", opt3[31:24], opt3[23:16], opt3[15:8], opt3[7:0]);
-            $display("%b %b %b %b", opt4[31:24], opt4[23:16], opt4[15:8], opt4[7:0]);
-            $display("%b %b %b %b", opt5[31:24], opt5[23:16], opt5[15:8], opt5[7:0]);
-            $display("%b %b %b %b", opt6[31:24], opt6[23:16], opt6[15:8], opt6[7:0]);
+            // $display("%b %b %b %b", opt1[31:24], opt1[23:16], opt1[15:8], opt1[7:0]);
+            // $display("%b %b %b %b", opt2[31:24], opt2[23:16], opt2[15:8], opt2[7:0]);
+            // $display("%b %b %b %b", opt3[31:24], opt3[23:16], opt3[15:8], opt3[7:0]);
+            // $display("%b %b %b %b", opt4[31:24], opt4[23:16], opt4[15:8], opt4[7:0]);
+            // $display("%b %b %b %b", opt5[31:24], opt5[23:16], opt5[15:8], opt5[7:0]);
+            // $display("%b %b %b %b", opt6[31:24], opt6[23:16], opt6[15:8], opt6[7:0]);
             $display("%e %b %3d %b %b", fy, fybit[31], fybit[30:23], fybit[22:0], fovf);
             // $display("%e / %e = %e\n", fx1, fx2, fy);
             $display("%e %b %3d %b carry(%b) over(%b) under(%b)\n", $bitstoshortreal(y), y[31:31], y[30:23], y[22:0], c, ovf, udf);
