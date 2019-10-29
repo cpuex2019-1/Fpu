@@ -2,7 +2,7 @@
 
 ## インターフェース
 
-### FAdd (fadd_second.sv)
+### FAdd
 module fadd(  
     input wire [31:0] s,  
     input wire [31:0] t,  
@@ -10,29 +10,34 @@ module fadd(
     output wire overflow  
 );
 
-### FMul (fmul_second.sv)
+### FMul
 module fmul(  
     input wire [31:0] s,  
     input wire [31:0] t,  
+    output wire [31:0] d,  
+    output wire overflow,  
+    output wire underflow  
+);  
+
+### FInv
+module finv(  
+    input wire [31:0] s,  
     output wire [31:0] d,  
     output wire overflow,  // not yet  
     output wire underflow  // not yet  
 );  
 
-### FInv (finv_first.sv)
-module fdiv(  
+### FSqrt
+module fsqrt(  
     input wire [31:0] s,  
-    output wire [31:0] d,  
-    output wire overflow,  // not yet  
-    output wire underflow  // not yet  
-);
+    output wire [31:0] d  
+);  
 
-## DONE:
-- 演算器の大枠を作成した
-    - 正規化数に対してはだいたい正しい値を返せる
-    - FAddは非正規化数に対応した
-    - FMulは一部の非正規化数の入力を除いてほぼ正しいモジュールができた
+## メモ
 
-## TODO:
-- 例外処理を行う
-    - overflowやunderflowを正しく出力する
+### DONE:
+- fadd, fmul, finv, fsqrtを作成した
+
+### TODO:
+- 仕様を満たす範囲内で処理を簡略化する
+- 必要ならば他のモジュールも作成する
