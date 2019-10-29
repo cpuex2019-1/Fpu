@@ -16,10 +16,12 @@ module finv_testbench();
    bit 	      fovf;
    bit 	      checkovf;
 
+   // DEBUG:
+   logic [31:0] counter;
    wire [0:0] sign_x;
    wire [7:0] exponent_x;
    wire [22:0] mantissa_x;
-   wire [47:0] opt1, opt2, opt3, opt4, opt5, opt6; 
+   // wire [47:0] a1,b1,c1,a2,b2,c2;
    assign {sign_x, exponent_x, mantissa_x} = x2i;
    assign x = x2i;
    finv u1(x,y,ovf,udf);
@@ -36,6 +38,7 @@ module finv_testbench();
       $display("ref. : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
       $display("fdiv : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
 
+      counter = 0;
       for (i=0; i<100; i++) begin
 
          x1i = $shortrealtobits(1.0);  
@@ -57,13 +60,16 @@ module finv_testbench();
          #1;
 
          if (y !== fybit) begin
+            counter = counter + 1;
             $display("x1 = %b %b %b, %3d", x[31], x[30:23], x[22:0], x[30:23]);
-            // $display("%b %b %b %b", opt1[31:24], opt1[23:16], opt1[15:8], opt1[7:0]);
-            // $display("%b %b %b %b", opt2[31:24], opt2[23:16], opt2[15:8], opt2[7:0]);
-            // $display("%b %b %b %b", opt3[31:24], opt3[23:16], opt3[15:8], opt3[7:0]);
-            // $display("%b %b %b %b", opt4[31:24], opt4[23:16], opt4[15:8], opt4[7:0]);
-            // $display("%b %b %b %b", opt5[31:24], opt5[23:16], opt5[15:8], opt5[7:0]);
-            // $display("%b %b %b %b", opt6[31:24], opt6[23:16], opt6[15:8], opt6[7:0]);
+            // DEBUG:
+            // $display("a1 = %b %b(%d)", a1[47:24], a1[23:0], a1);
+            // $display("b1 = %b %b(%d)", b1[47:24], b1[23:0], b1);
+            // $display("c1 = %b %b(%d)", c1[47:24], c1[23:0], c1);
+            // $display("a2 = %b %b(%d)", a2[47:24], a2[23:0], a2);
+            // $display("b2 = %b %b(%d)", b2[47:24], b2[23:0], b2);
+            // $display("c2 = %b %b(%d)", c2[47:24], c2[23:0], c2);
+            // DEBUG:
             $display("%e %b %3d %b %b", fy, fybit[31], fybit[30:23], fybit[22:0], fovf);
             // $display("%e / %e = %e\n", fx1, fx2, fy);
             $display("%e %b %3d %b carry(%b) over(%b) under(%b)\n", $bitstoshortreal(y), y[31:31], y[30:23], y[22:0], c, ovf, udf);
@@ -205,6 +211,7 @@ module finv_testbench();
       // end
 
       $display("end of checking module fadd");
+      $display("counter: %d", counter);
       //$finish;
    end
 endmodule

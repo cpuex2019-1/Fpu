@@ -1,11 +1,11 @@
 `timescale 1ns / 100ps
 `default_nettype none
 
-module fmul_testbench();
-   wire [31:0] x1,x2,y;
-   wire        ovf,udf;
-   logic [31:0] x1i,x2i;
-   shortreal    fx1,fx2,fy;
+module fsqrt_testbench();
+   wire [31:0] x1,x2,x,y;
+   wire        ovf,udf,c;
+   logic [31:0] xi,x1i,x2i;
+   shortreal    fx,fx1,fx2,fy;
    int          i,j,k,it,jt;
    bit [22:0]   m1,m2;
    bit [9:0]    dum1,dum2;
@@ -16,40 +16,20 @@ module fmul_testbench();
    bit 	      fovf;
    bit 	      checkovf;
 
-   wire [0:0] sign_x1, sign_x2;
-   wire [7:0] exponent_x1, exponent_x2;
-   wire [22:0] mantissa_x1, mantissa_x2;
-   wire [7:0] tmp1, tmp2;   
+   // DEBUG:
+   logic [31:0] counter;
+   wire [0:0] sign_x;
+   wire [7:0] exponent_x;
+   wire [22:0] mantissa_x;
+   wire [6:0] up;
+   // wire [47:0] a1,b1,c1,a2,b2,c2;
+   assign {sign_x, exponent_x, mantissa_x} = xi;
+   assign x = xi;
+   fsqrt u1(x,y,ovf,udf,up);
+   // fsqrt u1(x,y,ovf,udf,opt1,opt2,opt3,opt4,opt5,opt6);
 
-   assign {sign_x1, exponent_x1, mantissa_x1} = x1i;
-   assign {sign_x2, exponent_x2, mantissa_x2} = x2i;
-
-   assign tmp1 = 
-      exponent_x1 > 8'b11000000 ?
-          exponent_x1 - 8'b01000000
-      : (exponent_x1 < 8'b01000000 ?
-          exponent_x1 + 8'b01000000
-      : exponent_x1);
-   assign tmp2 = 
-      exponent_x2 > 8'b11000000 ?
-          exponent_x2 - 8'b01000000
-      : (exponent_x2 < 8'b01000000 ?
-          exponent_x2 + 8'b01000000
-      : exponent_x2);
-
-   // assign x1 = {sign_x1, tmp1, mantissa_x1};
-   // assign x2 = {sign_x2, tmp2, mantissa_x2};
-   assign x1 = x1i;
-   assign x2 = x2i;
-
-   wire snan, tnan;
-   wire [22:0] man_s, man_t;
-   wire c, de, u, g, r, st, f;
-   wire [7:0] sr, sl;
-   wire [47:0] mul;
-   wire [23:0] one_man;
-   // fmul u1(x1,x2,y,c,ovf,udf);
-   fmul u1(x1,x2,y,ovf,udf,c,de,sl,sr, mul,u,g,r,st,f);
+   // NOTE: fy = y * yがxに等しくなってほしい
+   fmul u2(y, y, fybit);
 
    initial begin
       // $dumpfile("test_fadd.vcd");
@@ -60,17 +40,14 @@ module fmul_testbench();
       $display("x1 = [input 1(bit)], [exponent 1(decimal)]");
       $display("x2 = [input 2(bit)], [exponent 2(decimal)]");
       $display("ref. : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
-      $display("fadd : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
+      $display("fdiv : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
 
-      for (i=0; i<10000; i++) begin
-
-         x1i = $urandom();         
-         x2i = $urandom();
-
-         fx1 = $bitstoshortreal(x1i);
-         fx2 = $bitstoshortreal(x2i);
-         fy = fx1 * fx2;
-         fybit = $shortrealtobits(fy);
+      counter = 0;
+      for (i=0; i<100; i++) begin
+         // NOTE: y * y = fy
+         xi = $urandom();
+         fx = $bitstoshortreal(xi);
+         fy = $bitstoshortreal(fybit);
 
          // checkovf = i < 255 && j < 255;
          // if ( checkovf && fybit[30:23] == 255 ) begin
@@ -81,17 +58,16 @@ module fmul_testbench();
                         
          #1;
 
-         if (y !== fybit ) begin
-            $display("x1 = %b %b %b, %3d", x1[31], x1[30:23], x1[22:0], x1[30:23]);
-            $display("x2 = %b %b %b, %3d", x2[31], x2[30:23], x2[22:0], x2[30:23]);
-            $display("denormal(%b) carry(%b) sl(%d) sr(%d) ", de, c, sl, sr);
-            $display("%b", one_man);
-            $display("u(%b) g(%b) r(%b) s(%b) f(%b)", u,g,r,st,f);
-            $display("%b %b %b %b %b %b", mul[47:40], mul[39:32], mul[31:24], mul[23:16], mul[15:8], mul[7:0]);
-            $display("%e %b %3d %b", fy, fybit[31], fybit[30:23], fybit[22:0]);
-            $display("%e %b %3d %b ovf(%b) udf(%b)\n", $bitstoshortreal(y), y[31], y[30:23], y[22:0], ovf, udf);
-            // $display("%e * %e = %e\n", fx1, fx2, fy);
-         end
+         // if (y !== fybit) begin
+            // counter = counter + 1;
+            $display("DEBUG: up = %b", up);
+            $display("%b %b %b, %3d", x[31:31], x[30:23], x[22:0], x[30:23]);
+            // $display("%e %b %3d %b %b", fy, fybit[31], fybit[30:23], fybit[22:0], fovf);
+            // $display("%e / %e = %e\n", fx1, fx2, fy);
+            $display("%e %b %3d %b\n", $bitstoshortreal(y), y[31:31], y[30:23], y[22:0]);
+            // $display("%e / %e = %e", $bitstoshortreal(1.0), $bitstoshortreal(x), $bitstoshortreal(y));
+           
+         // end
       end
 
       // for (i=0; i<256; i++) begin
@@ -227,6 +203,7 @@ module fmul_testbench();
       // end
 
       $display("end of checking module fadd");
+      $display("counter: %d", counter);
       //$finish;
    end
 endmodule
