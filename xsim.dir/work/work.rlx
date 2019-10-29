@@ -1,7 +1,0 @@
-0.6
-2018.3
-Dec  7 2018
-00:33:28
-C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v,1572338904,systemVerilog,,,,fmul,,,,,,,,
-C:/Users/tkodera/Desktop/CPU/Fpu/fsqrt.v,1572351973,systemVerilog,,C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v,,fsqrt,,,,,,,,
-C:/Users/tkodera/Desktop/CPU/Fpu/fsqrt_testbench.sv,1572351943,systemVerilog,,C:/Users/tkodera/Desktop/CPU/Fpu/fsqrt.v,,fsqrt_testbench,,,,,,,,

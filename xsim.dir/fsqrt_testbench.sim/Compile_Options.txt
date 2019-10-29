@@ -1,1 +1,0 @@
--debug "typical" "fsqrt_testbench" -s "fsqrt_testbench.sim" 
