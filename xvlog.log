@@ -1,0 +1,12 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/fsqrt_testbench.sv" into library work
+INFO: [VRFC 10-311] analyzing module fsqrt_testbench
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/fsqrt.v" into library work
+INFO: [VRFC 10-311] analyzing module shift_with_round
+INFO: [VRFC 10-311] analyzing module fsqrt
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v" into library work
+INFO: [VRFC 10-311] analyzing module fmul
+INFO: [VRFC 10-2458] undeclared symbol de, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v:35]
+INFO: [VRFC 10-2458] undeclared symbol sr, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v:69]
+INFO: [VRFC 10-2458] undeclared symbol sl, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v:70]
+INFO: [VRFC 10-2458] undeclared symbol snan, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v:196]
+INFO: [VRFC 10-2458] undeclared symbol tnan, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/fmul.v:197]

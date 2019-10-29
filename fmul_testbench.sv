@@ -49,7 +49,7 @@ module fmul_testbench();
    wire [47:0] mul;
    wire [23:0] one_man;
    // fmul u1(x1,x2,y,c,ovf,udf);
-   fmul u1(x1,x2,y,ovf,udf,c,de,sl,sr, mul,u,g,r,st,f);
+   fmul u1(x1,x2,y,ovf,udf);
 
    initial begin
       // $dumpfile("test_fadd.vcd");

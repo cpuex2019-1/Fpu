@@ -19,7 +19,7 @@ finv:
 	xsim --runall finv_testbench.sim
 
 fsqrt:
-	xvlog --sv fsqrt_testbench.sv fsqrt.v fmul_third.v
+	xvlog --sv fsqrt_testbench.sv fsqrt.v fmul.v
 	xelab -debug typical fsqrt_testbench -s fsqrt_testbench.sim
 	xsim --runall fsqrt_testbench.sim
 

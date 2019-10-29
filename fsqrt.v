@@ -1,15 +1,15 @@
 module shift_with_round(
-    input wire [47:0] s,
+    input wire [63:0] s,
     input wire [7:0] shift,
-    output wire [47:0] d
+    output wire [63:0] d
 );
 
 // NOTE: できるだけ誤差が少なくなるようにshiftする
-wire [47:0] t;
+wire [63:0] t;
 assign t = s >> shift;
 
 wire ulp, guard, round, sticky, flag;
-wire [47:0] for_ulp, for_guard, for_round;
+wire [63:0] for_ulp, for_guard, for_round;
 assign for_ulp = s >> shift;
 assign for_guard = s >> (shift - 8'b1);
 assign for_round = s >> (shift - 8'b10);
@@ -23,7 +23,7 @@ assign flag =
     (guard && (~round) && sticky) ||
     (guard && round);
 
-assign d = {t[47:1], flag};
+assign d = {t[63:1], flag};
 
 endmodule
 
@@ -34,18 +34,15 @@ module fsqrt(
     output wire [31:0] d,
     output wire overflow,
     output wire underflow,
-    output wire [6:0] up
-    // output wire [7:0] be,
-    // output wire [7:0] af,
-    // output wire [47:0] a1,
-    // output wire [47:0] b1,
-    // output wire [47:0] c1,
-    // output wire [47:0] a2,
-    // output wire [47:0] b2,
-    // output wire [47:0] c2
-    // output wire [31:0] x1,
-    // output wire [31:0] x2,
-    // output wire [31:0] x3,
+    output wire [63:0] a1,
+    output wire [63:0] b1,
+    output wire [63:0] c1,
+    output wire [63:0] a2,
+    output wire [63:0] b2,
+    output wire [63:0] c2,
+    output wire [31:0] iter0,
+    output wire [31:0] iter1,
+    output wire [31:0] iter2
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -62,45 +59,61 @@ wire [23:0] one_mantissa_s;
 assign one_mantissa_s = {1'b1, mantissa_s};
 
 // 符号を決める
-assign sign_d = sign_s;
+assign sign_d = 1'b0;
 
 // 指数を決める
-assign exponent_d = exponent_s >> 1;
+wire [8:0] tmp1, tmp2, tmp3;
+assign tmp1 = {1'b0, exponent_s} - 9'd127;
+assign tmp2 = tmp1 >> 1'b1;
+assign tmp3 = tmp2 + 9'd127;
+assign exponent_d = tmp3[7:0];
 
 // 仮数を決める
+// NOTE: 64bitで計算していく！
 wire [6:0] upper7;
 wire [15:0] lower16;
-wire [47:0] x0, x1, x2;
-wire [47:0] a1, a2, a3;
-wire [47:0] b1, b2, b3;
-wire [47:0] c1, c2, c3;
-wire [47:0] d1, d2, d3;
-wire [47:0] e1, e2, e3;
+wire [63:0] x0, x1, x2;
+// wire [63:0] a1, a2, a3;
+// wire [63:0] b1, b2, b3;
+// wire [63:0] c1, c2, c3;
+// wire [63:0] d1, d2, d3;
 
+// FIXME: Newton法を回す x_{n+1} = 1/2 (x_n + a / x_n)
+wire [63:0] om;
+assign om = 
+  exponent_s[0:0] == 1'b0 ? {32'b0, one_mantissa_s, 8'b0} : {31'b0, one_mantissa_s, 9'b0};
+
+assign x0 = {33'b1, upper7, lower16, 8'b0};
+assign a1 = om << 8'd32;
+assign b1 = a1 / x0;
+// shift_with_round u11(b1,8'd31,c1);
+assign c1 = x0 + b1;
+// shift_with_round u12(d1,8'd32,e1);
+assign x1 = c1 >> 1'b1;
 // DEBUG:
-assign up = upper7;
+assign iter0 = {sign_d, exponent_d, x0[30:8]};
+assign iter1 = {sign_d, exponent_d, x1[30:8]};
+assign iter2 = {sign_d, exponent_d, x2[30:8]};
 
-// FIXME: Newton法を回す
-wire [47:0] om;
-assign om = {24'b0, one_mantissa_s};
-
-assign x0 = {25'b1, mantissa_s[22:16], lower16};
-assign a1 = x0 << 1;
-assign b1 = (om * x0);
-shift_with_round u11(b1,8'd23,c1);
-assign d1 = (c1 * x0);
-shift_with_round u12(d1,8'd24,e1);
-assign x1 = a1 - e1;
-
-assign a2 = x1 << 1;
-assign b2 = (om * x1);
-shift_with_round u21(b2,8'd23,c2);
-assign d2 = (c2 * x1);
-shift_with_round u22(d2,8'd24,e2);
-assign x2 = a2 - e2;
+assign a2 = om << 8'd32;
+assign b2 = a2 / x1;
+// shift_with_round u11(b1,8'd31,c1);
+assign c2 = x1 + b2;
+// shift_with_round u12(d1,8'd32,e1);
+assign x2 = c2 >> 1'b1;
 
 // 仮数を決める
-assign mantissa_d = x0[22:0];
+wire ulp, guard, round, sticky, flag;
+assign ulp = x2[8:8];
+assign guard = x2[7:7];
+assign round = x2[6:6];
+assign sticky = |(x2[5:0]);
+assign flag = 
+    (ulp && guard && (~round) && (~sticky)) ||
+    (guard && (~round) && sticky) ||
+    (guard && round);
+
+assign mantissa_d = x2[30:8] + {22'b0, flag};
 
 // 初期値の下位bitはとりあえず0で
 assign lower16 = 16'b0;

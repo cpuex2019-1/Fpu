@@ -1,0 +1,7 @@
+Running: xsim.dir/fsqrt_testbench.sim/xsimk.exe -runall -simmode gui -wdb fsqrt_testbench.sim.wdb -simrunnum 0 -socket 60202
+Design successfully loaded
+Design Loading Memory Usage: 5148 KB (Peak: 5148 KB)
+Design Loading CPU Usage: 15 ms
+Simulation completed
+Simulation Memory Usage: 6040 KB (Peak: 6040 KB)
+Simulation CPU Usage: 46 ms

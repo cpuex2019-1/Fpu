@@ -3,17 +3,7 @@ module fmul(
     input wire [31:0] t,
     output wire [31:0] d,
     output wire overflow,
-    output wire underflow,
-    output wire c,
-    output wire de,
-    output wire [7:0] sl,
-    output wire [7:0] sr,
-    output wire [47:0] mul,
-    output wire u,
-    output wire g,
-    output wire r,
-    output wire st,
-    output wire f
+    output wire underflow
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -74,8 +64,6 @@ assign one_mantissa_d_48bit = {24'b0, one_mantissa_s} * {24'b0, one_mantissa_t};
 assign carry =
     one_mantissa_d_48bit[47:47] && ~d_is_denormalized;
 // assign shift_left = carry;
-// DEBUG:
-assign mul = one_mantissa_d_48bit;
 
 wire [7:0] shift_left, shift_right;
 assign sr = shift_right;
@@ -136,10 +124,7 @@ assign one_mantissa_d_24bit =
         one_mantissa_d_scaled[47:24]
     :
         one_mantissa_d_scaled[46:23];
-
-// DEBUG:
-assign c = carry;
-
+        
 // 丸める
 wire [23:0] one_mantissa_d;
 wire ulp, guard, round, sticky, flag;
@@ -156,15 +141,7 @@ assign flag =
     (guard && (~round) && sticky) ||
     (guard && round);
 
-//DEBUG:
 assign one_mantissa_d = one_mantissa_d_24bit + {23'b0, flag};
-assign one_man = one_mantissa_d;
-
-assign u = ulp;
-assign g = guard;
-assign r = round;
-assign st = sticky;
-assign f = flag;
 
 // 指数と仮数を決定する
 
