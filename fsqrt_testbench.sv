@@ -2,7 +2,8 @@
 `default_nettype none
 
 module fsqrt_testbench();
-   wire [31:0] x1,x2,x,y;
+   // wire [31:0] x1,x2;
+   wire [31:0] x,y;
    wire        ovf,udf,c;
    logic [31:0] xi,x1i,x2i;
    shortreal    fx,fx1,fx2,fy;
@@ -21,18 +22,14 @@ module fsqrt_testbench();
    wire [0:0] sign_x;
    wire [7:0] exponent_x;
    wire [22:0] mantissa_x;
-   wire [63:0] a1,b1,c1,a2,b2,c2;
-   wire [31:0] iter0, iter1, iter2;
    assign {sign_x, exponent_x, mantissa_x} = xi;
    assign x = xi;
-   fsqrt u1(x,y,ovf,udf,a1,b1,c1,a2,b2,c2,iter0,iter1,iter2);
-   // fsqrt u1(x,y,ovf,udf,opt1,opt2,opt3,opt4,opt5,opt6);
+   fsqrt u1(x,y);
 
-   // NOTE: yyi = y * yがxに等しくなってほしい
    wire hoge,huga;
    wire [31:0] yyi;
    shortreal yy;
-   fmul u2(y, y, yyi, hoge,huga);
+   fmul u2(y, y, yyi,ovf,udf);
 
    initial begin
       // $dumpfile("test_fadd.vcd");
@@ -61,19 +58,9 @@ module fsqrt_testbench();
                         
          #1;
 
-         if(x[30:0] !== yyi[30:0]) begin
+         if(x[30:0] !== yyi[30:0] && x[31:31] == 1'b0) begin
             counter = counter + 1;
-            // $display("%b %b %b %b %b %b %b %b", a1[63:56], a1[55:48], a1[47:40], a1[39:32], a1[31:24], a1[23:16], a1[15:8], a1[7:0]);
-            // $display("%b %b %b %b %b %b %b %b", b1[63:56], b1[55:48], b1[47:40], b1[39:32], b1[31:24], b1[23:16], b1[15:8], b1[7:0]);
-            // $display("%b %b %b %b %b %b %b %b", c1[63:56], c1[55:48], c1[47:40], c1[39:32], c1[31:24], c1[23:16], c1[15:8], c1[7:0]);
-            // $display("%b %b %b %b %b %b %b %b", a2[63:56], a2[55:48], a2[47:40], a2[39:32], a2[31:24], a2[23:16], a2[15:8], a2[7:0]);
-            // $display("%b %b %b %b %b %b %b %b", b2[63:56], b2[55:48], b2[47:40], b2[39:32], b2[31:24], b2[23:16], b2[15:8], b2[7:0]);
-            // $display("%b %b %b %b %b %b %b %b", c2[63:56], c2[55:48], c2[47:40], c2[39:32], c2[31:24], c2[23:16], c2[15:8], c2[7:0]);
             $display("%e %b %b %b %3d", $bitstoshortreal(x), x[31:31], x[30:23], x[22:0], x[30:23]);
-            // $display("%e / %e = %e\n", fx1, fx2, fy);
-            $display("%e %b %b %b %3d", $bitstoshortreal(iter0), iter0[31:31], iter0[30:23], iter0[22:0], iter0[30:23]);
-            $display("%e %b %b %b %3d", $bitstoshortreal(iter1), iter1[31:31], iter1[30:23], iter1[22:0], iter1[30:23]);
-            $display("%e %b %b %b %3d", $bitstoshortreal(iter2), iter2[31:31], iter2[30:23], iter2[22:0], iter2[30:23]);
             $display("%e %b %b %b %3d", $bitstoshortreal(y), y[31:31], y[30:23], y[22:0], y[30:23]);
             $display("%e %b %b %b %3d\n", $bitstoshortreal(yyi), yyi[31:31], yyi[30:23], yyi[22:0], yyi[30:23]);
             // $display("%e / %e = %e", $bitstoshortreal(1.0), $bitstoshortreal(x), $bitstoshortreal(y));
