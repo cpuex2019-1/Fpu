@@ -60,9 +60,9 @@ assign l_is_denormalized =
 // NOTE: 修正した指数をつくる
 wire [7:0] one_exponent_s, one_exponent_t;
 wire [7:0] one_exponent_g, one_exponent_l;
-assign one_exponent_g = // exponent_g;
+assign one_exponent_g =
     g_is_denormalized ? exponent_g + 8'b1 : exponent_g;
-assign one_exponent_l = // exponent_l;
+assign one_exponent_l =
     l_is_denormalized ? exponent_l + 8'b1 : exponent_l;
 
 // 仮数どうしのAddのために省略している1を元に戻す
@@ -85,6 +85,7 @@ wire [55:0] one_mantissa_g_56bit, one_mantissa_l_56bit, one_mantissa_d_56bit;
 
 assign relative_scale = one_exponent_g - one_exponent_l;
 assign meaningless = relative_scale > 8'b00011001;
+// FIXME: assign pre_shift = relative_scale;
 assign pre_shift = meaningless ? 5'b11111 : relative_scale[4:0];
 
 assign one_mantissa_g_56bit = {one_mantissa_g, 31'b0};
@@ -103,7 +104,7 @@ assign one_mantissa_d_27bit = is_add ? one_mantissa_g_27bit + one_mantissa_l_27b
 
 // 正規化を行う
 wire shift_right;
-wire [4:0] shift_left;
+wire [4:0] shift_left, shift;
 wire [55:0] one_mantissa_d_scaled;
 wire [26:0] mantissa_d_scaled;
 
@@ -111,7 +112,7 @@ wire [26:0] mantissa_d_scaled;
 // それまでに出た0の数だけ<<する
 assign carry = one_mantissa_d_27bit[26:26];
 assign shift_right = carry;
-assign shift_left = 
+assign shift = 
     (one_mantissa_d_27bit[25:25] == 1'b1) ? 0 :
     (one_mantissa_d_27bit[24:24] == 1'b1) ? 1 :
     (one_mantissa_d_27bit[23:23] == 1'b1) ? 2 :
@@ -141,12 +142,18 @@ assign shift_left =
 
 // 正規化のためだけに56bitに拡張する
 // 正規化後は必ず下位28bitの先頭が1になる(最下位２bitは後で丸めるときに使う)
-assign one_mantissa_d_56bit =
-is_add ?
-{29'b0, one_mantissa_d_27bit} >> shift_right :
-{29'b0, one_mantissa_d_27bit} << shift_left;
 
-assign one_mantissa_d_scaled = one_mantissa_d_56bit[26:2];
+//DEBUG:
+// assign shift_left =
+//     shift > one_exponent_g ? one_exponent_g - 5'b1 : shift;
+
+// assign one_mantissa_d_56bit =
+// is_add ?
+// {29'b0, one_mantissa_d_27bit} >> shift_right :
+// {29'b0, one_mantissa_d_27bit} << shift_left;
+
+// assign one_mantissa_d_scaled =
+//     shift > one_exponent_g ? one_mantissa_d_56bit[25:1] : one_mantissa_d_56bit[26:2];
 
 // 丸めを行う
 // NOTE:
@@ -186,30 +193,12 @@ is_add ?
 
 assign mantissa_d = mantissa_d_rounded[22:0];
 
-// 出力の準備をする
-
-wire is_nan;
-assign is_nan =
-    (exponent_s == 8'd255 && mantissa_s != 8'd0) ||
-    (exponent_t == 8'd255 && mantissa_s != 8'd0) ||
-    ((exponent_s == 8'd255 && mantissa_s == 8'd0) &&
-     (exponent_t == 8'd255 && mantissa_t == 8'd0) &&
-     (sign_s != sign_t));
-wire is_inf;
-assign is_inf =
-    ((exponent_s == 8'd255 && mantissa_s == 8'd0) ||
-    (exponent_t == 8'd255 && mantissa_t == 8'd0)) &&
-    ~is_nan; 
-wire is_denormalized;
-assign is_denormalized =  //include zero
-    (exponent_s == 8'd0) || (exponent_t == 8'd0);
-
 wire s_is_nan;
 assign s_is_nan =
     exponent_s == 8'd255 && mantissa_s != 8'd0;
 wire t_is_nan;
 assign t_is_nan =
-    exponent_t == 8'd255 && mantissa_s != 8'd0;
+    exponent_t == 8'd255 && mantissa_t != 8'd0;
 wire s_is_inf;
 assign s_is_inf =
     exponent_s == 8'd255 && mantissa_s == 8'd0;
@@ -234,6 +223,27 @@ assign d_is_t =
 assign d_is_zero =
     (sign_s != sign_t) && (exponent_s == exponent_t) && (mantissa_s == mantissa_t);
 
+// NOTE: 引き算についてはshift_leftできるかどうかで決める
+// NOTE:
+// 結果が非正規化数になるときにも先頭に1がくるまでshiftする
+// できなければ非正規化数として指数を0にする
+
+wire d_is_denormalized;
+assign d_is_denormalized = 
+    ~is_add && (shift_left < shift);
+
+// FIXME:
+assign shift_left =
+    shift >= one_exponent_g ? one_exponent_g - 8'd1 : shift;
+
+assign one_mantissa_d_56bit =
+is_add ?
+{29'b0, one_mantissa_d_27bit} >> shift_right :
+{29'b0, one_mantissa_d_27bit} << shift_left;
+
+assign one_mantissa_d_scaled =
+    one_mantissa_d_56bit[26:2];
+
 // FIXME: あとで整理する(使ってはいる)
 wire [45:0] tmp1, tmp2, tmp3;
 wire [22:0] tmp4;
@@ -243,10 +253,9 @@ assign tmp3 = tmp2 >> (exponent_d - 8'b1);
 assign tmp4 = tmp3[22:0];
 
 assign d = 
-    // NaN
-    s_is_nan ? {sign_s, 8'd255, {1'b1, mantissa_s[21:0]}} :
-    t_is_nan ? {sign_t, 8'd255, {1'b1, mantissa_t[21:0]}} :
-    s_is_inf && t_is_inf ? (sign_s == sign_t ? {sign_s, 8'd255, 23'b0} : {1'b0, 8'd255, 1'b1, 22'b0}) :
+    t_is_nan ? {sign_t, 8'd255, mantissa_t} :
+    s_is_nan ? {sign_s, 8'd255, mantissa_s} :
+    s_is_inf && t_is_inf ? (sign_s == sign_t ? {sign_s, 8'd255, 23'd0} : {1'b0, 8'd255, 1'b1, 22'd0}) :
     s_is_inf ? {sign_s, 8'd255, 23'd0} :
     t_is_inf ? {sign_t, 8'd255, 23'd0} :
     // NOTE: not inf + not inf = inf    
@@ -254,7 +263,8 @@ assign d =
     d_is_s ? {sign_s, exponent_s, mantissa_s} :
     d_is_t ? {sign_t, exponent_t, mantissa_t} :
     d_is_zero ? {1'b0, 8'b0, 23'b0} :
-    s_is_denormalized || t_is_denormalized ? {sign_d, exponent_d, tmp4} : {sign_d, exponent_d, mantissa_d};
+    d_is_denormalized ? {sign_d, 8'd0, mantissa_d} :
+    {sign_d, exponent_d, mantissa_d};
 
 assign overflow =
     (exponent_d == 8'b11111111 && exponent_s != 8'b11111111 && exponent_t != 8'b11111111 && ~d_is_zero) ? 1 : 0;
