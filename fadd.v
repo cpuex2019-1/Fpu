@@ -226,13 +226,15 @@ wire t_is_zero;
 assign t_is_zero =
     exponent_t == 8'd0 && mantissa_t == 8'd0;
 
-wire d_is_s, d_is_t;
+wire d_is_s, d_is_t, d_is_zero;
 assign d_is_s =
     t_is_zero || (s_greater_than_t && relative_scale > 8'b00011000);
 assign d_is_t =
     s_is_zero || (s_less_than_t && relative_scale > 8'b00011000);
+assign d_is_zero =
+    (sign_s != sign_t) && (exponent_s == exponent_t) && (mantissa_s == mantissa_t);
 
-// FIXME: これは何？
+// FIXME: あとで整理する(使ってはいる)
 wire [45:0] tmp1, tmp2, tmp3;
 wire [22:0] tmp4;
 assign tmp1 = {23'b0, mantissa_d} << (exponent_d - 8'b1);
@@ -242,34 +244,20 @@ assign tmp4 = tmp3[22:0];
 
 assign d = 
     // NaN
-    s_is_nan ?
-        {sign_s, 8'd255, {1'b1, mantissa_s[21:0]}}
-    : (t_is_nan ?
-        {sign_t, 8'd255, {1'b1, mantissa_t[21:0]}}
-    : (s_is_inf && t_is_inf ?
-        (sign_s == sign_t ?
-            {sign_s, 8'd255, 23'b00000000000000000000000}
-        :
-            {1'b0, 8'd255, 23'b10000000000000000000000})
-    : (s_is_inf ?
-        {sign_s, 8'd255, 23'b0}
-    : (t_is_inf ?
-        {sign_t, 8'd255, 23'b0}
+    s_is_nan ? {sign_s, 8'd255, {1'b1, mantissa_s[21:0]}} :
+    t_is_nan ? {sign_t, 8'd255, {1'b1, mantissa_t[21:0]}} :
+    s_is_inf && t_is_inf ? (sign_s == sign_t ? {sign_s, 8'd255, 23'b0} : {1'b0, 8'd255, 1'b1, 22'b0}) :
+    s_is_inf ? {sign_s, 8'd255, 23'd0} :
+    t_is_inf ? {sign_t, 8'd255, 23'd0} :
     // NOTE: not inf + not inf = inf    
-    : (d_is_inf ?
-        {sign_d, 8'd255, 23'b0}
-    : (d_is_s ?
-        {sign_s, exponent_s, mantissa_s}
-    : (d_is_t ?
-        {sign_t, exponent_t, mantissa_t}
-    : (s_is_denormalized || t_is_denormalized ? 
-        {sign_d, exponent_d, tmp4}
-    :
-        {sign_d, exponent_d, mantissa_d}
-    ))))))));
+    d_is_inf ? {sign_d, 8'd255, 23'b0} :
+    d_is_s ? {sign_s, exponent_s, mantissa_s} :
+    d_is_t ? {sign_t, exponent_t, mantissa_t} :
+    d_is_zero ? {1'b0, 8'b0, 23'b0} :
+    s_is_denormalized || t_is_denormalized ? {sign_d, exponent_d, tmp4} : {sign_d, exponent_d, mantissa_d};
 
 assign overflow =
-    (exponent_d == 8'b11111111 && exponent_s != 8'b11111111 && exponent_t != 8'b11111111) ? 1 : 0;
+    (exponent_d == 8'b11111111 && exponent_s != 8'b11111111 && exponent_t != 8'b11111111 && ~d_is_zero) ? 1 : 0;
 
 endmodule
 

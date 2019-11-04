@@ -38,45 +38,45 @@ module finv_testbench();
       $display("ref. : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
       $display("fdiv : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
 
-      counter = 0;
-      for (i=0; i<100; i++) begin
+      // counter = 0;
+      // for (i=0; i<10000; i++) begin
 
-         x1i = $shortrealtobits(1.0);  
-         x2i = $urandom();
+      //    x1i = $shortrealtobits(1.0);  
+      //    x2i = $urandom();
 
-         // fx1 = $bitstoshortreal(x1i);
-         fx1 = 1.0;
-         fx2 = $bitstoshortreal(x2i);
-         fy = fx1 / fx2;
-         fybit = $shortrealtobits(fy);
+      //    // fx1 = $bitstoshortreal(x1i);
+      //    fx1 = 1.0;
+      //    fx2 = $bitstoshortreal(x2i);
+      //    fy = fx1 / fx2;
+      //    fybit = $shortrealtobits(fy);
 
-         // checkovf = i < 255 && j < 255;
-         // if ( checkovf && fybit[30:23] == 255 ) begin
-         //    fovf = 1;
-         // end else begin
-         //    fovf = 0;
-         // end
+      //    // checkovf = i < 255 && j < 255;
+      //    // if ( checkovf && fybit[30:23] == 255 ) begin
+      //    //    fovf = 1;
+      //    // end else begin
+      //    //    fovf = 0;
+      //    // end
                         
-         #1;
+      //    #1;
 
-         if (y !== fybit) begin
-            counter = counter + 1;
-            $display("x1 = %b %b %b, %3d", x[31], x[30:23], x[22:0], x[30:23]);
-            // DEBUG:
-            // $display("a1 = %b %b(%d)", a1[47:24], a1[23:0], a1);
-            // $display("b1 = %b %b(%d)", b1[47:24], b1[23:0], b1);
-            // $display("c1 = %b %b(%d)", c1[47:24], c1[23:0], c1);
-            // $display("a2 = %b %b(%d)", a2[47:24], a2[23:0], a2);
-            // $display("b2 = %b %b(%d)", b2[47:24], b2[23:0], b2);
-            // $display("c2 = %b %b(%d)", c2[47:24], c2[23:0], c2);
-            // DEBUG:
-            $display("%e %b %3d %b %b", fy, fybit[31], fybit[30:23], fybit[22:0], fovf);
-            // $display("%e / %e = %e\n", fx1, fx2, fy);
-            $display("%e %b %3d %b carry(%b) over(%b) under(%b)\n", $bitstoshortreal(y), y[31:31], y[30:23], y[22:0], c, ovf, udf);
-            // $display("%e / %e = %e", $bitstoshortreal(1.0), $bitstoshortreal(x), $bitstoshortreal(y));
+      //    if (y !== fybit) begin
+      //       counter = counter + 1;
+      //       $display("x1 = %b %b %b, %3d", x[31], x[30:23], x[22:0], x[30:23]);
+      //       // DEBUG:
+      //       // $display("a1 = %b %b(%d)", a1[47:24], a1[23:0], a1);
+      //       // $display("b1 = %b %b(%d)", b1[47:24], b1[23:0], b1);
+      //       // $display("c1 = %b %b(%d)", c1[47:24], c1[23:0], c1);
+      //       // $display("a2 = %b %b(%d)", a2[47:24], a2[23:0], a2);
+      //       // $display("b2 = %b %b(%d)", b2[47:24], b2[23:0], b2);
+      //       // $display("c2 = %b %b(%d)", c2[47:24], c2[23:0], c2);
+      //       // DEBUG:
+      //       $display("%e %b %3d %b %b", fy, fybit[31], fybit[30:23], fybit[22:0], fovf);
+      //       // $display("%e / %e = %e\n", fx1, fx2, fy);
+      //       $display("%e %b %3d %b carry(%b) over(%b) under(%b)\n", $bitstoshortreal(y), y[31:31], y[30:23], y[22:0], c, ovf, udf);
+      //       // $display("%e / %e = %e", $bitstoshortreal(1.0), $bitstoshortreal(x), $bitstoshortreal(y));
            
-         end
-      end
+      //    end
+      // end
 
       // for (i=0; i<256; i++) begin
       //    for (j=0; j<256; j++) begin
