@@ -1,0 +1,5 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/fadd_testbench.sv" into library work
+INFO: [VRFC 10-311] analyzing module fadd_testbench
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/fadd.v" into library work
+INFO: [VRFC 10-311] analyzing module fadd
+INFO: [VRFC 10-2458] undeclared symbol meaningless, assumed default net type wire [C:/Users/tkodera/Desktop/CPU/Fpu/fadd.v:87]

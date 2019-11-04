@@ -2,16 +2,16 @@ module finv(
     input wire [31:0] s,
     output wire [31:0] d,
     output wire overflow,
-    output wire underflow,
-    output wire [63:0] x0,
-    output wire [63:0] a1, 
-    output wire [63:0] b1,
-    output wire [63:0] c1,
-    output wire [63:0] x1, 
-    output wire [63:0] a2, 
-    output wire [63:0] b2,
-    output wire [63:0] c2, 
-    output wire [63:0] x2 
+    output wire underflow
+    // output wire [63:0] x0,
+    // output wire [63:0] a1, 
+    // output wire [63:0] b1,
+    // output wire [63:0] c1,
+    // output wire [63:0] x1, 
+    // output wire [63:0] a2, 
+    // output wire [63:0] b2,
+    // output wire [63:0] c2, 
+    // output wire [63:0] x2 
     );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -42,6 +42,8 @@ wire [14:0] lower15;
 
 // NOTE: Newton法を回す
 wire [63:0] om;
+wire [63:0] x0, x1, x2;
+wire [63:0] a1, a2, b1, b2, c1, c2;
 assign om = {32'b0, one_mantissa_s, 8'b0};
 
 assign x0 = {33'b1, upper8, lower15, 8'b0};
