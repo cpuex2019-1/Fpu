@@ -77,8 +77,8 @@ module fadd_testbench();
       // end
 
       for (i=0; i<256; i++) begin
-         for (j=i; j<i+2; j++) begin
-         // for (j=0; j<256; j++) begin
+         // for (j=i; j<i+2; j++) begin
+         for (j=0; j<256; j++) begin
             for (s1=0; s1<2; s1++) begin
                for (s2=0; s2<2; s2++) begin
                   for (it=0; it<10; it++) begin

@@ -1,0 +1,7 @@
+Running: xsim.dir/fadd_testbench.sim/xsimk.exe -runall -simmode gui -wdb fadd_testbench.sim.wdb -simrunnum 0 -socket 62254
+Design successfully loaded
+Design Loading Memory Usage: 5068 KB (Peak: 5068 KB)
+Design Loading CPU Usage: 61 ms
+Simulation completed
+Simulation Memory Usage: 5720 KB (Peak: 5720 KB)
+Simulation CPU Usage: 91342 ms
