@@ -3,17 +3,26 @@ module fmul(
     input wire [31:0] t,
     output wire [31:0] d,
     output wire overflow,
-    output wire underflow,
+    output wire underflow
     // DEBUG:
-    output wire shift_left,
-    output wire [4:0] shift_right,
-    output wire ulp,
-    output wire guard,
-    output wire round,
-    output wire sticky,
-    output wire flag,
-    output wire d_is_denormalized
+    // output wire shift_left,
+    // output wire [4:0] shift_right,
+    // output wire ulp,
+    // output wire guard,
+    // output wire round,
+    // output wire sticky,
+    // output wire flag,
+    // output wire d_is_denormalized
 );
+
+wire shift_left;
+wire [4:0] shift_right;
+wire ulp;
+wire guard;
+wire round;
+wire sticky;
+wire flag;
+wire d_is_denormalized;
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
 wire [0:0] sign_s, sign_t, sign_d;

@@ -52,8 +52,8 @@ module fmul_testbench();
    wire ulp,guard,round,sticky,flag;
    wire shift_left;
    wire [4:0] shift_right;
-   // fmul u1(x1,x2,y,c,ovf,udf);
-   fmul u1(x1,x2,y,ovf,udf,shift_left,shift_right,ulp,guard,round,sticky,flag,denormal);
+   fmul u1(x1,x2,y,ovf,udf);
+   // fmul u1(x1,x2,y,ovf,udf,shift_left,shift_right,ulp,guard,round,sticky,flag,denormal);
 
    initial begin
       // $dumpfile("test_fadd.vcd");
