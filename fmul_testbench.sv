@@ -48,8 +48,12 @@ module fmul_testbench();
    wire [7:0] sr, sl;
    wire [47:0] mul;
    wire [23:0] one_man;
+   wire denormal;
+   wire ulp,guard,round,sticky,flag;
+   wire shift_left;
+   wire [4:0] shift_right;
    // fmul u1(x1,x2,y,c,ovf,udf);
-   fmul u1(x1,x2,y,ovf,udf);
+   fmul u1(x1,x2,y,ovf,udf,shift_left,shift_right,ulp,guard,round,sticky,flag,denormal);
 
    initial begin
       // $dumpfile("test_fadd.vcd");
@@ -154,10 +158,12 @@ module fmul_testbench();
                         #1;
 
                         // if (y !== fybit || ovf !== fovf) begin
-                        if (y !== fybit) begin
+                        if (y !== fybit && (y == 32'd0 || fybit == 32'd0)) begin
                            $display("x1 = %b %b %b, %3d", x1[31], x1[30:23], x1[22:0], x1[30:23]);
                            $display("x2 = %b %b %b, %3d", x2[31], x2[30:23], x2[22:0], x2[30:23]);
-      //                      // DEBUG:
+                           // DEBUG:
+                           $display("ulp(%b) guard(%b) round(%b) sticky(%b) flag(%b)", ulp,guard,round,sticky,flag);
+                           $display("denormal(%b)", denormal);
                            // $display("ps = %b, sr = %b, sl = %b, cr = %b", ps, sr, sl, cr);
                            // $display("man1 = %b %b", man1[55:28], man1[27:0]);
                            // $display("man2 = %b %b", man2[55:28], man2[27:0]);

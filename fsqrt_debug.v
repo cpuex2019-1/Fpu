@@ -33,8 +33,8 @@ module fsqrt(
     input wire [31:0] s,
     output wire [31:0] d,
     output wire overflow,
-    output wire underflow,
-    output wire [6:0] up
+    output wire underflow
+    // output wire [6:0] up
     // output wire [7:0] be,
     // output wire [7:0] af,
     // output wire [47:0] a1,

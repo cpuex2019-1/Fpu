@@ -3,7 +3,16 @@ module fmul(
     input wire [31:0] t,
     output wire [31:0] d,
     output wire overflow,
-    output wire underflow
+    output wire underflow,
+    // DEBUG:
+    output wire shift_left,
+    output wire [4:0] shift_right,
+    output wire ulp,
+    output wire guard,
+    output wire round,
+    output wire sticky,
+    output wire flag,
+    output wire d_is_denormalized
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -19,8 +28,8 @@ assign mantissa_s = s[22:0];
 assign mantissa_t = t[22:0];
 
 // 正規化されているか調べる(何桁落ちるかも調べる)
-wire s_is_denormalized, t_is_denormalized, d_is_denormalized;
-// wire [7:0] adjust;
+wire s_is_denormalized, t_is_denormalized;
+// wire d_is_denormalized;
 assign s_is_denormalized =
     exponent_s == 8'd0;
 assign t_is_denormalized =
@@ -110,21 +119,24 @@ assign shift =
 // 繰り上がりの有無で場合分けする
 assign one_mantissa_d_24bit =
     carry == 1'b1 ?
-        one_mantissa_d_scaled[47:24]
-    :
-        one_mantissa_d_scaled[46:23];
+    one_mantissa_d_scaled[47:24]:
+    one_mantissa_d_scaled[46:23];
         
 // 丸める
 wire [23:0] one_mantissa_d;
-wire ulp, guard, round, sticky, flag;
+// wire ulp, guard, round, sticky, flag;
 assign ulp = (carry == 1'b1) ?
-    one_mantissa_d_scaled[24:24] : one_mantissa_d_scaled[23:23];
+    one_mantissa_d_scaled[24:24] :
+    one_mantissa_d_scaled[23:23];
 assign guard = (carry == 1'b1) ?
-    one_mantissa_d_scaled[23:23] : one_mantissa_d_scaled[22:22];
+    one_mantissa_d_scaled[23:23] :
+    one_mantissa_d_scaled[22:22];
 assign round = (carry == 1'b1) ?
-    one_mantissa_d_scaled[22:22] : one_mantissa_d_scaled[21:21];
+    one_mantissa_d_scaled[22:22] :
+    one_mantissa_d_scaled[21:21];
 assign sticky = (carry == 1'b1) ?
-    |(one_mantissa_d_scaled[21:0]) : |(one_mantissa_d_scaled[20:0]); 
+    |(one_mantissa_d_scaled[21:0]) :
+    |(one_mantissa_d_scaled[20:0]); 
 assign flag = 
     (ulp && guard && (~round) && (~sticky)) ||
     (guard && (~round) && sticky) ||
