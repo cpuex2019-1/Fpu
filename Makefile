@@ -24,5 +24,15 @@ fsqrt:
 	xelab -debug typical fsqrt_testbench -s fsqrt_testbench.sim
 	xsim --runall fsqrt_testbench.sim
 
+ftoi:
+	xvlog --sv ftoi_testbench.sv ftoi.v
+	xelab -debug typical ftoi_testbench -s ftoi_testbench.sim
+	xsim --runall ftoi_testbench.sim
+
+itof:
+	xvlog --sv itof_testbench.sv itof.v
+	xelab -debug typical itof_testbench -s itof_testbench.sim
+	xsim --runall itof_testbench.sim
+
 clean:
 	rm -rf xsim.dir *.jou *.log *.pb *.sim.wdb

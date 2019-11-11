@@ -1,0 +1,8 @@
+0.6
+2018.3
+Dec  7 2018
+00:33:28
+C:/Users/tkodera/Desktop/CPU/Fpu/ftoi.v,1573450853,systemVerilog,,,,ftoi,,,,,,,,
+C:/Users/tkodera/Desktop/CPU/Fpu/ftoi_testbench.sv,1573450984,systemVerilog,,C:/Users/tkodera/Desktop/CPU/Fpu/ftoi.v,,ftoi_testbench,,,,,,,,
+C:/Users/tkodera/Desktop/CPU/Fpu/itof.v,1573443565,systemVerilog,,,,itof,,,,,,,,
+C:/Users/tkodera/Desktop/CPU/Fpu/itof_testbench.sv,1573442730,systemVerilog,,C:/Users/tkodera/Desktop/CPU/Fpu/itof.v,,itof_testbench,,,,,,,,

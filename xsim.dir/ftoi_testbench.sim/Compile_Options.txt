@@ -1,0 +1,1 @@
+-debug "typical" "ftoi_testbench" -s "ftoi_testbench.sim" 

@@ -1,0 +1,4 @@
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/ftoi_testbench.sv" into library work
+INFO: [VRFC 10-311] analyzing module ftoi_testbench
+INFO: [VRFC 10-2263] Analyzing SystemVerilog file "C:/Users/tkodera/Desktop/CPU/Fpu/ftoi.v" into library work
+INFO: [VRFC 10-311] analyzing module ftoi

@@ -9,7 +9,6 @@ module shift_with_round(
     output wire flag
 );
 
-// NOTE: できるだけ誤差が少なくなるようにshiftする
 wire [63:0] t;
 assign t = s >> shift;
 
