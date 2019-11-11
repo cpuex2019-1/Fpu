@@ -1,7 +1,0 @@
-Running: xsim.dir/ftoi_testbench.sim/xsimk.exe -runall -simmode gui -wdb ftoi_testbench.sim.wdb -simrunnum 0 -socket 51847
-Design successfully loaded
-Design Loading Memory Usage: 5052 KB (Peak: 5052 KB)
-Design Loading CPU Usage: 15 ms
-Simulation completed
-Simulation Memory Usage: 5668 KB (Peak: 5668 KB)
-Simulation CPU Usage: 1125 ms
