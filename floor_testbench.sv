@@ -32,7 +32,6 @@ module floor_testbench();
    wire cr;
    wire [55:0] man1,man2,man3;
    
-   // DEBUG:
    wire inf, zero;
    wire ulp,guard,round,sticky,flag;
    floor u1(x,y);
@@ -48,25 +47,27 @@ module floor_testbench();
       $display("ref. : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
       $display("fadd : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
 
-      for (i=0; i<10000000; i++) begin
-        sign_xi = $urandom();
-        exponent_xi = $urandom() % 8'd10 + 8'd127;
-        mantissa_xi = $urandom();
-        xi = {sign_xi, exponent_xi, mantissa_xi};
-        fy = $floor($bitstoshortreal(xi));
-        fybit = $shortrealtobits(fy);
+      for (j=0; j<256; j++) begin
+         // for (i=0; i<1000000; i++) begin
+            // sign_xi = $urandom();
+            sign_xi = 1'b1;
+            exponent_xi = j;
+            mantissa_xi = 23'd0;
+            // mantissa_xi = $urandom();
+            xi = {sign_xi, exponent_xi, mantissa_xi};
+            fy = $floor($bitstoshortreal(xi));
+            fybit = $shortrealtobits(fy);
 
-        #1;
+            #1;
 
-        if (fybit != y) begin
-          // $display("is_inf(%b) is_zero(%b)", inf, zero);
-          // $display("ulp(%b) g(%b) r(%b) s(%b) flag(%b)", ulp,guard,round,sticky,flag);
-          $display("carry = %b", carry);
-          $display("tmp = %b", tmp);
-          $display("x = %b %b %b %e", x[31:31], x[30:23], x[22:0], $bitstoshortreal(x));
-          $display("y = %b %e", y, $bitstoshortreal(y));
-          $display("y = %b %e\n", fybit, fy);
-        end
+            if (fybit != y && y[30:23] != 8'd255) begin
+               // $display("is_inf(%b) is_zero(%b)", inf, zero);
+               // $display("ulp(%b) g(%b) r(%b) s(%b) flag(%b)", ulp,guard,round,sticky,flag);
+               $display("x = %b %b %b %e", x[31:31], x[30:23], x[22:0], $bitstoshortreal(x));
+               $display("y = %b %e", y, $bitstoshortreal(y));
+               $display("y = %b %e\n", fybit, fy);
+            end
+         // end
       end
    end
 
