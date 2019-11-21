@@ -34,5 +34,10 @@ itof:
 	xelab -debug typical itof_testbench -s itof_testbench.sim
 	xsim --runall itof_testbench.sim
 
+floor:
+	xvlog --sv floor_testbench.sv floor.v
+	xelab -debug typical floor_testbench -s floor_testbench.sim
+	xsim --runall floor_testbench.sim
+
 clean:
 	rm -rf xsim.dir *.jou *.log *.pb *.sim.wdb
