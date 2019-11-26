@@ -12,26 +12,21 @@ wire [31:0] ans;
 logic [31:0] ans_logic;
 shortreal ans_real;
 wire ovf, udf;
-logic clk;
 
 fadd u0(src,sink,dest,ovf);
 
 // NOTE: wireをlogicにつないでおき、initial文の中でlogicに代入する
 assign src = src_logic;
+assign sink = sink_logic;
 // assign tmp1 = tmp1_logic;
 assign tmp2 = tmp2_logic;
 assign ans = ans_logic;
 
 // NOTE: 必要になった変数はここに
 int i, j, k;
-shortreal one_real;
-logic [31:0] one_logic;
 
 // NOTE: テスト内容を記述する
 initial begin
-  clk = 0;
-  one_real = 1.0;
-  one_logic = $shortrealtobits(one_real);
   for (i=0; i<100; i++) begin
 
     // NOTE: 入出力を決める
@@ -39,16 +34,13 @@ initial begin
     src_real = $bitstoshortreal(src_logic);
 
     // NOTE: clock 1 
-    clk = !clk;
     #1;
 
     // tmp2_logic = tmp1_logic;
 
     // NOTE: clock 2
-    clk = !clk;
-    #1;
 
-    ans_real = one_real / src_real;
+    ans_real = one_real + src_real;
     ans_logic = $shortrealtobits(ans_real);
 
     #1;

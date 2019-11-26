@@ -39,9 +39,15 @@ initial begin
     clk = !clk;
     #1;
 
+    clk = !clk;
+    #1;
+
     // tmp2_logic = tmp1_logic;
 
     // NOTE: clock 2
+    clk = !clk;
+    #1;
+
     clk = !clk;
     #1;
 

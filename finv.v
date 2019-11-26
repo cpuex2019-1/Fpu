@@ -315,7 +315,7 @@ endmodule
 // NOTE: FInv(latter)
 module finv_latter(
     input wire [31:0] s,
-    input wire [63:0] x,
+    input reg [63:0] x,
     output wire [31:0] d,
     output wire overflow,
     output wire underflow
@@ -406,26 +406,13 @@ module finv(
     output wire underflow
 );
 
-wire [63:0] x;
-reg state;
-reg [31:0] ss;
-reg [63:0] xx;
-
-assign x = xx;
+reg [63:0] xx, yy;
 
 finv_former u1(s,xx);
-finv_latter u2(s,x,d,overflow,underflow);
-
-initial begin
-  state <= 0;
-end
+finv_latter u2(s,yy,d,overflow,underflow);
 
 always @(posedge clk) begin
-    if (state == 0) begin
-        state <= 1;
-    end else begin
-        state <= 0;
-    end
+    yy <= xx;
 end
 
 endmodule
