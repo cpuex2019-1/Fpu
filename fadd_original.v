@@ -1,3 +1,4 @@
+// NOTE: 非正規化数の処理をショートカットしたFAdd 
 module fadd(
     input wire [31:0] s,
     input wire [31:0] t,
