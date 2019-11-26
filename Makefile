@@ -15,12 +15,17 @@ fdiv:
 
 finv:
 	# xvlog --sv finv_testbench_takt.sv finv_debug.v
-	xvlog --sv finv_testbench_takt.sv finv.v
+	xvlog --sv finv_testbench.sv finv.v finv_former.v finv_latter.v
 	xelab -debug typical finv_testbench -s finv_testbench.sim
 	xsim --runall finv_testbench.sim
 
+# finv_split:
+# 	xvlog --sv testbench_original.sv finv.v finv_former.v finv_latter.v
+# 	xelab -debug typical finv_testbench -s finv_testbench.sim
+# 	xsim --runall finv_testbench.sim
+
 fsqrt:
-	xvlog --sv fsqrt_testbench.sv fsqrt.v fmul.v
+	xvlog --sv fsqrt_testbench.sv fsqrt.v fsqrt_former.v fsqrt_latter.v
 	xelab -debug typical fsqrt_testbench -s fsqrt_testbench.sim
 	xsim --runall fsqrt_testbench.sim
 
