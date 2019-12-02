@@ -68,6 +68,7 @@ initial begin
     $display("dest = %b %b %b", dest[31:31], dest[30:23], dest[22:0]);
     $display("dest = %b %b %b", dest_square_logic[31:31], dest_square_logic[30:23], dest_square_logic[22:0]);
     $display(" ans = %b %b %b", ans[31:31], ans[30:23], ans[22:0]);
+    $display();
 
   end
 
