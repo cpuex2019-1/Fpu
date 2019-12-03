@@ -21,7 +21,8 @@ wire ulp,guard,round,sticky,flag;
 wire [55:0] g_56, l_56, d_56;
 wire [26:0] d_27;
 wire [22:0] scale;
-fadd u0(src,sink,dest,ovf,g_56, l_56, d_27, d_56,scale,ulp,guard,round,sticky,flag);
+// fadd u0(src,sink,dest,ovf,g_56, l_56, d_27, d_56,scale,ulp,guard,round,sticky,flag);
+fadd u0(src,sink,dest,ovf);
 
 // NOTE: wireをlogicにつないでおき、initial文の中でlogicに代入する
 // assign src = {sign_src, exp_src, man_src};
@@ -117,20 +118,20 @@ initial begin
         #1;
 
         // NOTE: DEBUG:のために表示する
-        // if (dest != ans) begin
+        if (dest != ans) begin
           $display("counter = %d", counter);
-          $display("ulp(%b) guard(%b) round(%b) sticky(%b) flag(%b)", ulp, guard, round, sticky, flag);
-          $display("g_56 = %b %b %b %b %b %b %b", g_56[55:48], g_56[47:40], g_56[39:32], g_56[31:24], g_56[23:16], g_56[15:8], g_56[7:0]);
-          $display("l_56 = %b %b %b %b %b %b %b", l_56[55:48], l_56[47:40], l_56[39:32], l_56[31:24], l_56[23:16], l_56[15:8], l_56[7:0]);
-          $display("d_27 = %b %b %b %b %b %b %b", d_27[26:19], d_27[18:11], d_27[10:3], {d_27[2:0], 5'd0}, 8'd0, 8'd0, 8'd0);
-          $display("d_56 = %b %b %b %b %b %b %b", d_56[55:48], d_56[47:40], d_56[39:32], d_56[31:24], d_56[23:16], d_56[15:8], d_56[7:0]);
-          $display("scale = %b", scale);
+          // $display("ulp(%b) guard(%b) round(%b) sticky(%b) flag(%b)", ulp, guard, round, sticky, flag);
+          // $display("g_56 = %b %b %b %b %b %b %b", g_56[55:48], g_56[47:40], g_56[39:32], g_56[31:24], g_56[23:16], g_56[15:8], g_56[7:0]);
+          // $display("l_56 = %b %b %b %b %b %b %b", l_56[55:48], l_56[47:40], l_56[39:32], l_56[31:24], l_56[23:16], l_56[15:8], l_56[7:0]);
+          // $display("d_27 = %b %b %b %b %b %b %b", d_27[26:19], d_27[18:11], d_27[10:3], {d_27[2:0], 5'd0}, 8'd0, 8'd0, 8'd0);
+          // $display("d_56 = %b %b %b %b %b %b %b", d_56[55:48], d_56[47:40], d_56[39:32], d_56[31:24], d_56[23:16], d_56[15:8], d_56[7:0]);
+          // $display("scale = %b", scale);
           $display(" src = %b %b %b", src[31:31], src[30:23], src[22:0]);
           $display("sink = %b %b %b", sink[31:31], sink[30:23], sink[22:0]);
           $display("dest = %b %b %b", dest[31:31], dest[30:23], dest[22:0]);
           $display(" ans = %b %b %b", ans[31:31], ans[30:23], ans[22:0]);
           $display();
-        // end
+        end
 
       end
     end
