@@ -47,29 +47,13 @@ assign x1 = b1 - e1;   // x' = (3x-ax^3)/2
 
 assign x = x1;
 
-// wire [63:0] y0,y1,y2;
-// assign y0 = (x0 * om) >> 8'd31;
-// assign y1 = (x1 * om) >> 8'd31;
-// assign y2 = (x2 * om) >> 8'd31;
-
-// 仮数を決める
-// wire ulp, guard, round, sticky, flag;
-// assign ulp = y2[8:8];
-// assign guard = y2[7:7];
-// assign round = y2[6:6];
-// assign sticky = |(y2[5:0]);
-// assign flag = 
-//     (ulp && guard && (~round) && (~sticky)) ||
-//     (guard && (~round) && sticky) ||
-//     (guard && round);
-
 // 初期値の下位bitはとりあえず0で
 assign lower16 = 16'b0;
 
 // NOTE: 初期値の上位7桁を決める
 assign upper7 =
 exponent_s[0:0] == 1'b1 ? (
-mantissa_s[22:16] == 7'b0000000 ? 7'b0000000 :
+mantissa_s[22:16] == 7'b0000000 ? 7'b1111111 :
 mantissa_s[22:16] == 7'b0000001 ? 7'b1111111 :
 mantissa_s[22:16] == 7'b0000010 ? 7'b1111111 :
 mantissa_s[22:16] == 7'b0000011 ? 7'b1111110 :
