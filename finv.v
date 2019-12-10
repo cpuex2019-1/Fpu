@@ -1,3 +1,5 @@
+// NOTE: 分割した後
+
 // NOTE: FInv(former)
 module finv_former(
     input wire [31:0] s,
