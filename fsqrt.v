@@ -1,6 +1,10 @@
-module fsqrt_former(
+// NOTE: stage1
+module fsqrt_stage1(
     input wire [31:0] s,
-    output reg [63:0] x
+    output wire [63:0] om,
+    output reg [63:0] b1,
+    output reg [63:0] c1,
+    output reg [63:0] d1
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -16,40 +20,15 @@ assign mantissa_s = s[22:0];
 wire [23:0] one_mantissa_s;
 assign one_mantissa_s = {1'b1, mantissa_s};
 
-// 指数を決める
-wire [8:0] tmp1, tmp2, tmp3;
-assign tmp1 = {1'b0, exponent_s} - 9'd127;
-assign tmp2 = tmp1 >> 1'b1;
-assign tmp3 = tmp2 + 9'd127;
-
-// 仮数を決める
-wire [6:0] upper7;
-wire [15:0] lower16;
-wire [63:0] x0, x1, x2;
-wire [63:0] a1, a2, a3;
-wire [63:0] b1, b2, b3;
-wire [63:0] c1, c2, c3;
-wire [63:0] d1, d2, d3;
-wire [63:0] e1, e2, e3;
-
-// FIXME: Newton法を回す x_{n+1} = 1/2 (3 x_n + a / x_n)
-wire [63:0] om;
+// Newton法で求めたい値を決める
 assign om = 
   exponent_s[0:0] == 1'b0 ? {31'b0, one_mantissa_s, 9'b0} : {32'b0, one_mantissa_s, 8'b0};
 
-assign x0 = {33'b0, upper7, lower16, 8'b0};
-assign a1 = x0 >> 8'd1; // a = x/2
-assign b1 = a1 + x0; // b = 3x/2
-assign c1 = (om * x0) >> 8'd31; // c = ax
-assign d1 = (x0 * x0) >> 8'd31; // d = x^2/2
-assign e1 = (c1 * d1) >> 8'd32; // e = ax^3/2
-assign x1 = b1 - e1;   // x' = (3x-ax^3)/2
-
-assign x = x1;
-
+// Newton法の初期値を設定する
+wire [6:0] upper7;
+wire [15:0] lower16;
 // 初期値の下位bitはとりあえず0で
 assign lower16 = 16'b0;
-
 // NOTE: 初期値の上位7桁を決める
 assign upper7 =
 exponent_s[0:0] == 1'b1 ? (
@@ -310,11 +289,59 @@ mantissa_s[22:16] == 7'b1111101 ? 7'b1000000 :
 mantissa_s[22:16] == 7'b1111110 ? 7'b1000000 : 7'b1000000
 );
 
+// NOTE: Newton法を回す x_{n+1} = 1/2 (3 x_n + a / x_n)
+wire [63:0] x0, a1;
+assign x0 = {33'b0, upper7, lower16, 8'b0};
+assign a1 = x0 >> 8'd1; // a = x/2
+assign b1 = a1 + x0; // b = 3x/2
+assign c1 = (om * x0) >> 8'd31; // c = ax
+assign d1 = (x0 * x0) >> 8'd31; // d = x^2/2
+
 endmodule
 
-module fsqrt_latter(
+
+// NOTE: stage2
+module fsqrt_stage2(
+    input wire [63:0] om,
+    input wire [63:0] b1,
+    input wire [63:0] c1,
+    input wire [63:0] d1,
+    output reg [63:0] x1
+);
+
+wire [63:0] e1;
+assign e1 = (c1 * d1) >> 8'd32; // e = ax^3/2
+assign x1 = b1 - e1;   // x' = (3x-ax^3)/2
+
+endmodule
+
+
+// NOTE: stage3
+module fsqrt_stage3(
+    input reg [63:0] om,
+    input reg [63:0] x1,
+    output reg [63:0] b2,
+    output reg [63:0] c2,
+    output reg [63:0] d2
+);
+
+// NOTE: Newton法を回す x_{n+1} = 1/2 (3 x_n + a / x_n)
+wire [63:0] a2;
+assign a2 = x1 >> 8'd1; // a = x/2
+assign b2 = a2 + x1; // b = 3x/2
+assign c2 = (om * x1) >> 8'd31; // c = ax
+assign d2 = (x1 * x1) >> 8'd31; // d = x^2/2
+
+endmodule
+
+
+// NOTE: stage4
+module fsqrt_stage4(
     input wire [31:0] s,
-    input reg [63:0] x,
+    input wire [63:0] om,
+    input wire [63:0] b2,
+    input wire [63:0] c2,
+    input wire [63:0] d2,
     output wire [31:0] d
 );
 
@@ -327,9 +354,10 @@ assign sign_s = s[31:31];
 assign exponent_s = s[30:23];
 assign mantissa_s = s[22:0];
 
-// 省略されている1を元に戻す
-wire [23:0] one_mantissa_s;
-assign one_mantissa_s = {1'b1, mantissa_s};
+wire [63:0] e2, x2, y2;
+assign e2 = (c2 * d2) >> 8'd32; // e = ax^3/2
+assign x2 = b2 - e2;   // x' = (3x-ax^3)/2
+assign y2 = (x2 * om) >> 8'd31;
 
 // 符号を決める
 assign sign_d = 1'b0;
@@ -342,35 +370,6 @@ assign tmp3 = tmp2 + 9'd127;
 assign exponent_d = tmp3[7:0];
 
 // 仮数を決める
-wire [6:0] upper7;
-wire [15:0] lower16;
-wire [63:0] x0, x1, x2;
-wire [63:0] a1, a2;
-wire [63:0] b1, b2;
-wire [63:0] c1, c2;
-wire [63:0] d1, d2;
-wire [63:0] e1, e2;
-
-// FIXME: Newton法を回す x_{n+1} = 1/2 (3 x_n + a / x_n)
-wire [63:0] om;
-assign om = 
-  exponent_s[0:0] == 1'b0 ? {31'b0, one_mantissa_s, 9'b0} : {32'b0, one_mantissa_s, 8'b0};
-
-assign x1 = x;
-
-assign a2 = x1 >> 8'd1; // a = x/2
-assign b2 = a2 + x1; // b = 3x/2
-assign c2 = (om * x1) >> 8'd31; // c = ax
-assign d2 = (x1 * x1) >> 8'd31; // d = x^2/2
-assign e2 = (c2 * d2) >> 8'd32; // e = ax^3/2
-assign x2 = b2 - e2;   // x' = (3x-ax^3)/2
-
-wire [63:0] y0,y1,y2;
-assign y0 = (x0 * om) >> 8'd31;
-assign y1 = (x1 * om) >> 8'd31;
-assign y2 = (x2 * om) >> 8'd31;
-
-// 仮数を決める
 wire ulp, guard, round, sticky, flag;
 assign ulp = y2[8:8];
 assign guard = y2[7:7];
@@ -380,17 +379,15 @@ assign flag =
     (ulp && guard && (~round) && (~sticky)) ||
     (guard && (~round) && sticky) ||
     (guard && round);
-
 assign mantissa_d = y2[30:8] + {22'b0, flag};
 
 // 出力する
-
 assign d = 
-  sign_s == 1'b0 ?
-    {sign_d, exponent_d, mantissa_d}
-  : {1'b0, 8'd255, 23'b1};
+  sign_s == 1'b0 ? {sign_d, exponent_d, mantissa_d}
+  : {1'b0, 8'd0, 23'd0};
 
 endmodule
+
 
 // NOTE: fsqrt
 module fsqrt(
@@ -399,13 +396,33 @@ module fsqrt(
   output wire [31:0] d
 );
 
-reg [63:0] xx, yy;
+wire [63:0] om;
+wire [63:0] wire_b1, wire_c1, wire_d1, wire_x1, wire_b2, wire_c2, wire_d2; 
+reg [63:0] inreg_b1, inreg_c1, inreg_d1, inreg_x1, inreg_b2, inreg_c2, inreg_d2;
+reg [63:0] outreg_b1, outreg_c1, outreg_d1, outreg_x1, outreg_b2, outreg_c2, outreg_d2;
 
-fsqrt_former u1(s,xx);
-fsqrt_latter u2(s,yy,d);
+fsqrt_stage1 u1(s,om,outreg_b1,outreg_c1,outreg_d1);
+fsqrt_stage2 u2(om,wire_b1,wire_c1,wire_d1,outreg_x1);
+fsqrt_stage3 u3(om,wire_x1,outreg_b2,outreg_c2,outreg_d2);
+fsqrt_stage4 u4(s,om,wire_b2,wire_c2,wire_d2,d);
+
+assign wire_b1 = inreg_b1;
+assign wire_c1 = inreg_c1;
+assign wire_d1 = inreg_d1;
+assign wire_x1 = inreg_x1;
+assign wire_b2 = inreg_b2;
+assign wire_c2 = inreg_c2;
+assign wire_d2 = inreg_d2;
 
 always @(posedge clk) begin
-    yy <= xx;
+  inreg_b1 <= outreg_b1;
+  inreg_c1 <= outreg_c1;
+  inreg_d1 <= outreg_d1;
+  inreg_x1 <= outreg_x1;
+  inreg_b2 <= outreg_b2;
+  inreg_c2 <= outreg_c2;
+  inreg_d2 <= outreg_d2;
 end
+
 endmodule
 

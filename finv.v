@@ -1,9 +1,10 @@
-// NOTE: 分割した後
-
-// NOTE: FInv(former)
-module finv_former(
-    input wire [31:0] s,
-    output reg [63:0] x
+// NOTE: stage1
+module finv_stage1(
+  input wire [31:0] s,
+  output wire [63:0] target,
+  output reg [63:0] a1,
+  output reg [63:0] b1,
+  output reg [63:0] x0
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -23,37 +24,11 @@ assign one_mantissa_s = {1'b1, mantissa_s};
 wire [7:0] upper8;
 wire [14:0] lower15;
 
-// Newton法を回す(targetの値を近似する)
-wire [63:0] target;
-wire [63:0] x0, x1;
-wire [63:0] a1, b1, c1;
-wire [63:0] d1, e1;
 assign target = {32'b0, one_mantissa_s, 8'b0};
 
-// 初期値を決める
-assign x0 = {33'b1, upper8, lower15, 8'b0};
-
-// wire ulp11, guard11, round11, sticky11, flag11;
-// wire ulp12, guard12, round12, sticky12, flag12;
-// wire ulp21, guard21, round21, sticky21, flag21;
-// wire ulp22, guard22, round22, sticky22, flag22;
-
-// NOTE: shift_with_roundを使ったほうが誤差が出にくい
-assign a1 = x0 << 8'd1;
-assign b1 = (target * x0);
-// shift_with_round u11(b1, 8'd31, c1, ulp11, guard11, round11, sticky11, flag11);
-assign c1 = b1 >> 8'd31;
-assign d1 = (c1 * x0);
-// shift_with_round u12(d1, 8'd32, e1, ulp12, guard12, round12, sticky12, flag12);
-assign e1 = d1 >> 8'd32;
-assign x1 = a1 - e1;
-
-// 出力する
-assign x = x1; 
-
+// Newton法の初期値を決める
 // 初期値の下位bitはとりあえず0で
 assign lower15 = 15'b0;
-
 // NOTE: 初期値の上位8桁を決める
 assign upper8 =
 mantissa_s[22:15] == 8'b00000000 ? 8'b11111111 :
@@ -312,15 +287,54 @@ mantissa_s[22:15] == 8'b11111100 ? 8'b00000010 :
 mantissa_s[22:15] == 8'b11111101 ? 8'b00000001 :
 mantissa_s[22:15] == 8'b11111110 ? 8'b00000001 : 00000000;
 
+// Newton法を回す
+// wire [63:0] x0;
+assign x0 = {33'b1, upper8, lower15, 8'b0};
+assign a1 = x0 << 8'd1;
+assign b1 = (target * x0) >> 8'd31;
+
 endmodule
 
-// NOTE: FInv(latter)
-module finv_latter(
-    input wire [31:0] s,
-    input reg [63:0] x,
-    output wire [31:0] d,
-    output wire overflow,
-    output wire underflow
+
+// NOTE: stage2
+module finv_stage2(
+  input wire [63:0] x0,
+  input wire [63:0] target,
+  input wire [63:0] a1,
+  input wire [63:0] b1,
+  output reg [63:0] x1
+);
+
+wire [63:0] c1;
+assign c1 = (b1 * x0) >> 8'd32;
+assign x1 = a1 - c1;
+
+endmodule
+
+
+// NOTE: stage3
+module finv_stage3(
+  input wire [63:0] x1,
+  input wire [63:0] target,
+  output reg [63:0] a2,
+  output reg [63:0] b2
+);
+
+// Newton法を回す
+assign a2 = x1 << 8'd1;
+assign b2 = (target * x1) >> 8'd31;
+
+endmodule
+
+
+// NOTE: stage4
+module finv_stage4(
+  input wire [31:0] s,
+  input wire [63:0] x1,
+  input wire [63:0] target,
+  input wire [63:0] a2,
+  input wire [63:0] b2,
+  output wire [31:0] d
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -332,9 +346,9 @@ assign sign_s = s[31:31];
 assign exponent_s = s[30:23];
 assign mantissa_s = s[22:0];
 
-// 省略されている1を元に戻す
-wire [23:0] one_mantissa_s;
-assign one_mantissa_s = {1'b1, mantissa_s};
+wire [63:0] c2, x2;
+assign c2 = (b2 * x1) >> 8'd32;
+assign x2 = a2 - c2;
 
 // 符号を決める
 assign sign_d = sign_s;
@@ -343,36 +357,6 @@ assign sign_d = sign_s;
 assign exponent_d = 
     exponent_s == 8'd254 ? 8'd0 :
     mantissa_s == 23'd0 ? 8'd254 - exponent_s : 8'd253 - exponent_s;
-
-// 仮数を決める
-wire [7:0] upper8;
-wire [14:0] lower15;
-
-// Newton法を回す(targetの値を近似する)
-wire [63:0] target;
-wire [63:0] x1, x2;
-wire [63:0] a1, a2, b1, b2, c1, c2;
-wire [63:0] d1, e1, d2, e2;
-assign target = {32'b0, one_mantissa_s, 8'b0};
-
-// 初期値を決める
-assign x1 = x;
-
-// wire ulp11, guard11, round11, sticky11, flag11;
-// wire ulp12, guard12, round12, sticky12, flag12;
-// wire ulp21, guard21, round21, sticky21, flag21;
-// wire ulp22, guard22, round22, sticky22, flag22;
-
-// NOTE: shift_with_roundを使ったほうが誤差が出にくい
-
-assign a2 = x1 << 8'd1;
-assign b2 = (target * x1);
-// shift_with_round u21(b2, 8'd31, c2, ulp21, guard21, round21, sticky21, flag21);
-assign c2 = b2 >> 8'd31;
-assign d2 = (c2 * x1);
-// shift_with_round u22(d2, 8'd32, e2, ulp22, guard22, round22, sticky22, flag22);
-assign e2 = d2 >> 8'd32;
-assign x2 = a2 - e2;
 
 // 仮数を決める
 wire ulp, guard, round, sticky, flag;
@@ -390,14 +374,14 @@ assign mantissa_d =
     exponent_s == 8'd254 ? x2[32:10] : 
     mantissa_s == 8'd0 ? mantissa_s : x2[30:8] + {22'b0, flag};
 
-
 // 出力する
-
+wire overflow, underflow;
 assign d = {sign_d, exponent_d, mantissa_d}; 
 assign overflow = 1'b0;
 assign underflow = 1'b0;
 
 endmodule
+
 
 // NOTE: FInv
 module finv(
@@ -408,13 +392,30 @@ module finv(
     output wire underflow
 );
 
-reg [63:0] xx, yy;
+wire [63:0] target;
+wire [63:0] wire_a1, wire_b1, wire_x0, wire_x1, wire_a2, wire_b2; 
+reg [63:0] inreg_a1, inreg_b1, inreg_x0, inreg_x1, inreg_a2, inreg_b2;
+reg [63:0] outreg_a1, outreg_b1, outreg_x0, outreg_x1, outreg_a2, outreg_b2;
 
-finv_former u1(s,xx);
-finv_latter u2(s,yy,d,overflow,underflow);
+finv_stage1 u1(s,target,outreg_a1,outreg_b1,outreg_x0);
+finv_stage2 u2(outreg_x0,target,wire_a1,wire_b1,outreg_x1);
+finv_stage3 u3(wire_x1,target,outreg_a2,outreg_b2);
+finv_stage4 u4(s,wire_x1,target,wire_a2,wire_b2,d);
+
+assign wire_a1 = inreg_a1;
+assign wire_b1 = inreg_b1;
+assign wire_x0 = inreg_x0;
+assign wire_x1 = inreg_x1;
+assign wire_a2 = inreg_a2;
+assign wire_b2 = inreg_b2;
 
 always @(posedge clk) begin
-    yy <= xx;
+  inreg_a1 <= outreg_a1;
+  inreg_b1 <= outreg_b1;
+  inreg_x0 <= outreg_x0;
+  inreg_x1 <= outreg_x1;
+  inreg_a2 <= outreg_a2;
+  inreg_b2 <= outreg_b2;
 end
 
 endmodule

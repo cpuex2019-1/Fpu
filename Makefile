@@ -18,6 +18,11 @@ finv:
 	xelab -debug typical finv_testbench -s finv_testbench.sim
 	xsim --runall finv_testbench.sim
 
+finv_original:
+	xvlog --sv finv_original_testbench.sv finv_original.v finv.v
+	xelab -debug typical finv_original_testbench -s finv_original_testbench.sim
+	xsim --runall finv_original_testbench.sim
+
 fsqrt:
 	xvlog --sv fsqrt_testbench.sv fsqrt.v
 	xelab -debug typical fsqrt_testbench -s fsqrt_testbench.sim

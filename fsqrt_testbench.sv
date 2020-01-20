@@ -30,18 +30,13 @@ initial begin
     src_real = $bitstoshortreal(src_logic);
 
     // NOTE: clock 1 
-    clk = !clk;
-    #1;
-
-    clk = !clk;
-    #1;
-
-    // NOTE: clock 2
-    clk = !clk;
-    #1;
-
-    clk = !clk;
-    #1;
+      clk = !clk; #1; clk = !clk; #1;
+      // NOTE: clock 2
+      clk = !clk; #1; clk = !clk; #1;
+      // NOTE: clock 3
+      clk = !clk; #1; clk = !clk; #1;
+      // NOTE: clock 4
+      clk = !clk; #1; clk = !clk; #1;
 
     ans_real = $sqrt(src_real);
     ans_logic = $shortrealtobits(ans_real);
