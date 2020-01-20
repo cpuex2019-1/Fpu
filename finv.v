@@ -2,9 +2,9 @@
 module finv_stage1(
   input wire [31:0] s,
   output wire [63:0] target,
-  output reg [63:0] a1,
-  output reg [63:0] b1,
-  output reg [63:0] x0
+  output wire [63:0] a1,
+  output wire [63:0] b1,
+  output wire [63:0] x0
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -302,7 +302,7 @@ module finv_stage2(
   input wire [63:0] target,
   input wire [63:0] a1,
   input wire [63:0] b1,
-  output reg [63:0] x1
+  output wire [63:0] x1
 );
 
 wire [63:0] c1;
@@ -316,8 +316,8 @@ endmodule
 module finv_stage3(
   input wire [63:0] x1,
   input wire [63:0] target,
-  output reg [63:0] a2,
-  output reg [63:0] b2
+  output wire [63:0] a2,
+  output wire [63:0] b2
 );
 
 // Newton法を回す
@@ -395,11 +395,10 @@ module finv(
 wire [63:0] target;
 wire [63:0] wire_a1, wire_b1, wire_x0, wire_x1, wire_a2, wire_b2; 
 reg [63:0] inreg_a1, inreg_b1, inreg_x0, inreg_x1, inreg_a2, inreg_b2;
-reg [63:0] outreg_a1, outreg_b1, outreg_x0, outreg_x1, outreg_a2, outreg_b2;
 
-finv_stage1 u1(s,target,outreg_a1,outreg_b1,outreg_x0);
-finv_stage2 u2(outreg_x0,target,wire_a1,wire_b1,outreg_x1);
-finv_stage3 u3(wire_x1,target,outreg_a2,outreg_b2);
+finv_stage1 u1(s,target,wire_a1,wire_b1,wire_x0);
+finv_stage2 u2(wire_x0,target,wire_a1,wire_b1,wire_x1);
+finv_stage3 u3(wire_x1,target,wire_a2,wire_b2);
 finv_stage4 u4(s,wire_x1,target,wire_a2,wire_b2,d);
 
 assign wire_a1 = inreg_a1;
@@ -410,12 +409,12 @@ assign wire_a2 = inreg_a2;
 assign wire_b2 = inreg_b2;
 
 always @(posedge clk) begin
-  inreg_a1 <= outreg_a1;
-  inreg_b1 <= outreg_b1;
-  inreg_x0 <= outreg_x0;
-  inreg_x1 <= outreg_x1;
-  inreg_a2 <= outreg_a2;
-  inreg_b2 <= outreg_b2;
+  inreg_a1 <= wire_a1;
+  inreg_b1 <= wire_b1;
+  inreg_x0 <= wire_x0;
+  inreg_x1 <= wire_x1;
+  inreg_a2 <= wire_a2;
+  inreg_b2 <= wire_b2;
 end
 
 endmodule

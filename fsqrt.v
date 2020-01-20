@@ -2,9 +2,9 @@
 module fsqrt_stage1(
     input wire [31:0] s,
     output wire [63:0] om,
-    output reg [63:0] b1,
-    output reg [63:0] c1,
-    output reg [63:0] d1
+    output wire [63:0] b1,
+    output wire [63:0] c1,
+    output wire [63:0] d1
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -306,7 +306,7 @@ module fsqrt_stage2(
     input wire [63:0] b1,
     input wire [63:0] c1,
     input wire [63:0] d1,
-    output reg [63:0] x1
+    output wire [63:0] x1
 );
 
 wire [63:0] e1;
@@ -318,11 +318,11 @@ endmodule
 
 // NOTE: stage3
 module fsqrt_stage3(
-    input reg [63:0] om,
-    input reg [63:0] x1,
-    output reg [63:0] b2,
-    output reg [63:0] c2,
-    output reg [63:0] d2
+    input wire [63:0] om,
+    input wire [63:0] x1,
+    output wire [63:0] b2,
+    output wire [63:0] c2,
+    output wire [63:0] d2
 );
 
 // NOTE: Newton法を回す x_{n+1} = 1/2 (3 x_n + a / x_n)
@@ -399,11 +399,10 @@ module fsqrt(
 wire [63:0] om;
 wire [63:0] wire_b1, wire_c1, wire_d1, wire_x1, wire_b2, wire_c2, wire_d2; 
 reg [63:0] inreg_b1, inreg_c1, inreg_d1, inreg_x1, inreg_b2, inreg_c2, inreg_d2;
-reg [63:0] outreg_b1, outreg_c1, outreg_d1, outreg_x1, outreg_b2, outreg_c2, outreg_d2;
 
-fsqrt_stage1 u1(s,om,outreg_b1,outreg_c1,outreg_d1);
-fsqrt_stage2 u2(om,wire_b1,wire_c1,wire_d1,outreg_x1);
-fsqrt_stage3 u3(om,wire_x1,outreg_b2,outreg_c2,outreg_d2);
+fsqrt_stage1 u1(s,om,wire_b1,wire_c1,wire_d1);
+fsqrt_stage2 u2(om,wire_b1,wire_c1,wire_d1,wire_x1);
+fsqrt_stage3 u3(om,wire_x1,wire_b2,wire_c2,wire_d2);
 fsqrt_stage4 u4(s,om,wire_b2,wire_c2,wire_d2,d);
 
 assign wire_b1 = inreg_b1;
@@ -415,13 +414,13 @@ assign wire_c2 = inreg_c2;
 assign wire_d2 = inreg_d2;
 
 always @(posedge clk) begin
-  inreg_b1 <= outreg_b1;
-  inreg_c1 <= outreg_c1;
-  inreg_d1 <= outreg_d1;
-  inreg_x1 <= outreg_x1;
-  inreg_b2 <= outreg_b2;
-  inreg_c2 <= outreg_c2;
-  inreg_d2 <= outreg_d2;
+  inreg_b1 <= wire_b1;
+  inreg_c1 <= wire_c1;
+  inreg_d1 <= wire_d1;
+  inreg_x1 <= wire_x1;
+  inreg_b2 <= wire_b2;
+  inreg_c2 <= wire_c2;
+  inreg_d2 <= wire_d2;
 end
 
 endmodule
