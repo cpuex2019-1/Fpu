@@ -1,3 +1,4 @@
+// NOTE: 非正規化数の処理をショートカットしたFAdd 
 module fadd(
     input wire [31:0] s,
     input wire [31:0] t,
@@ -46,24 +47,26 @@ wire carry, ulp, guard, round, sticky, flag;
 assign sign_d = sign_g;
 
 // NOTE: 非正規化処理を加える
-wire s_is_denormalized, t_is_denormalized;
-wire g_is_denormalized, l_is_denormalized;
-assign s_is_denormalized =
-    exponent_s == 8'd0;
-assign t_is_denormalized =
-    exponent_t == 8'd0;
-assign g_is_denormalized =
-    exponent_g == 8'd0;
-assign l_is_denormalized =
-    exponent_l == 8'd0;
+// wire s_is_denormalized, t_is_denormalized;
+// wire g_is_denormalized, l_is_denormalized;
+// assign s_is_denormalized =
+//     exponent_s == 8'd0;
+// assign t_is_denormalized =
+//     exponent_t == 8'd0;
+// assign g_is_denormalized =
+//     exponent_g == 8'd0;
+// assign l_is_denormalized =
+//     exponent_l == 8'd0;
 
 // NOTE: 修正した指数をつくる
 wire [7:0] one_exponent_s, one_exponent_t;
 wire [7:0] one_exponent_g, one_exponent_l;
 assign one_exponent_g =
-    g_is_denormalized ? exponent_g + 8'b1 : exponent_g;
+    // g_is_denormalized ? exponent_g + 8'b1 : 
+    exponent_g;
 assign one_exponent_l =
-    l_is_denormalized ? exponent_l + 8'b1 : exponent_l;
+    // l_is_denormalized ? exponent_l + 8'b1 :
+    exponent_l;
 
 // 仮数どうしのAddのために省略している1を元に戻す
 // carry + 1. + mantissa

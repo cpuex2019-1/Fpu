@@ -2,208 +2,59 @@
 `default_nettype none
 
 module fsqrt_testbench();
-   // wire [31:0] x1,x2;
-   wire [31:0] x,y;
-   wire        ovf,udf,c;
-   logic [31:0] xi,x1i,x2i;
-   shortreal    fx,fx1,fx2,fy;
-   int          i,j,k,it,jt;
-   bit [22:0]   m1,m2;
-   bit [9:0]    dum1,dum2;
-   logic [31:0] fybit;
-   int          s1,s2;
-   logic [23:0] dy;
-   bit [22:0] tm;
-   bit 	      fovf;
-   bit 	      checkovf;
 
-   // DEBUG:
-   logic [31:0] counter;
-   wire [0:0] sign_x;
-   wire [7:0] exponent_x;
-   wire [22:0] mantissa_x;
-   assign {sign_x, exponent_x, mantissa_x} = xi;
-   assign x = xi;
-   fsqrt u1(x,y);
+wire [31:0] src, dest;
+logic [31:0] src_logic, dest_logic;
+shortreal src_real, dest_real, tmp_real;
+wire [31:0] ans;
+logic [31:0] ans_logic;
+shortreal ans_real;
+logic clk;
 
-   wire hoge,huga;
-   wire [31:0] yyi;
-   shortreal yy;
-   fmul u2(y, y, yyi,ovf,udf);
+fsqrt u0(clk,src,dest);
 
-   initial begin
-      // $dumpfile("test_fadd.vcd");
-      // $dumpvars(0);
+// NOTE: wireをlogicにつないでおき、initial文の中でlogicに代入する
+assign src = src_logic;
+assign ans = ans_logic;
 
-      $display("start of checking module fadd");
-      $display("difference message format");
-      $display("x1 = [input 1(bit)], [exponent 1(decimal)]");
-      $display("x2 = [input 2(bit)], [exponent 2(decimal)]");
-      $display("ref. : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
-      $display("fdiv : result(float) sign(bit),exponent(decimal),mantissa(bit) overflow(bit)");
+// NOTE: 必要になった変数はここに
+int i, j, k;
 
-      counter = 0;
-      for (i=0; i<100; i++) begin
-         // NOTE: y * y = fy
-         xi = $urandom();
-         fx = $bitstoshortreal(xi);
-         yy = $bitstoshortreal(yyi);
+// NOTE: テスト内容を記述する
+initial begin
+  clk = 0;
+  for (i=0; i<1000000; i++) begin
 
-         // checkovf = i < 255 && j < 255;
-         // if ( checkovf && fybit[30:23] == 255 ) begin
-         //    fovf = 1;
-         // end else begin
-         //    fovf = 0;
-         // end
-                        
-         #1;
+    // NOTE: 入出力を決める
+    src_logic = $urandom();
+    src_real = $bitstoshortreal(src_logic);
 
-         if(x[30:0] !== yyi[30:0] && x[31:31] == 1'b0) begin
-            counter = counter + 1;
-            $display("%e %b %b %b %3d", $bitstoshortreal(x), x[31:31], x[30:23], x[22:0], x[30:23]);
-            $display("%e %b %b %b %3d", $bitstoshortreal(y), y[31:31], y[30:23], y[22:0], y[30:23]);
-            $display("%e %b %b %b %3d\n", $bitstoshortreal(yyi), yyi[31:31], yyi[30:23], yyi[22:0], yyi[30:23]);
-            // $display("%e / %e = %e", $bitstoshortreal(1.0), $bitstoshortreal(x), $bitstoshortreal(y));
-           
-         end
-      end
+    // NOTE: clock 1 
+      clk = !clk; #1; clk = !clk; #1;
+      // NOTE: clock 2
+      clk = !clk; #1; clk = !clk; #1;
+      // NOTE: clock 3
+      clk = !clk; #1; clk = !clk; #1;
+      // NOTE: clock 4
+      clk = !clk; #1; clk = !clk; #1;
 
-      // for (i=0; i<256; i++) begin
-      //    for (j=0; j<256; j++) begin
-      //       for (s1=0; s1<2; s1++) begin
-      //          for (s2=0; s2<2; s2++) begin
-      //             for (it=0; it<10; it++) begin
-      //                for (jt=0; jt<10; jt++) begin
-      //                   #1;
+    ans_real = $sqrt(src_real);
+    ans_logic = $shortrealtobits(ans_real);
 
-      //                   case (it)
-      //                     0 : m1 = 23'b0;
-      //                     1 : m1 = {22'b0,1'b1};
-      //                     2 : m1 = {21'b0,2'b10};
-      //                     3 : m1 = {1'b0,3'b111,19'b0};
-      //                     4 : m1 = {1'b1,22'b0};
-      //                     5 : m1 = {2'b10,{21{1'b1}}};
-      //                     6 : m1 = {23{1'b1}};
-      //                     default : begin
-      //                        if (i==256) begin
-      //                           {m1,dum1} = 0;
-      //                        end else begin
-      //                           {m1,dum1} = $urandom();
-      //                        end
-      //                     end
-      //                   endcase
+    #1;
 
-      //                   case (jt)
-      //                     0 : m2 = 23'b0;
-      //                     1 : m2 = {22'b0,1'b1};
-      //                     2 : m2 = {21'b0,2'b10};
-      //                     3 : m2 = {1'b0,3'b111,19'b0};
-      //                     4 : m2 = {1'b1,22'b0};
-      //                     5 : m2 = {2'b10,{21{1'b1}}};
-      //                     6 : m2 = {23{1'b1}};
-      //                     default : begin
-      //                        if (i==256) begin
-      //                           {m2,dum2} = 0;
-      //                        end else begin
-      //                           {m2,dum2} = $urandom();
-      //                        end
-      //                     end
-      //                   endcase
-                        
-      //                   x1i = {s1[0],i[7:0],m1};
-      //                   x2i = {s2[0],j[7:0],m2};
+    dest_real = $bitstoshortreal(dest);
 
-      //                   fx1 = $bitstoshortreal(x1i);
-      //                   fx2 = $bitstoshortreal(x2i);
-      //                   fy = fx1 * fx2;
-      //                   fybit = $shortrealtobits(fy);
+    // NOTE: DEBUG:のために表示する
+    if (ans != dest && src[31:31] == 0) begin
+      $display(" src = %e %b %b %b", src_real, src[31:31], src[30:23], src[22:0]);
+      $display("dest = %e %b %b %b", dest_real, dest[31:31], dest[30:23], dest[22:0]);
+      $display(" ans = %e %b %b %b", ans_real, ans[31:31], ans[30:23], ans[22:0]);
+      $display();
+    end
 
-		// 	checkovf = i < 255 && j < 255;
-		// 	if ( checkovf && fybit[30:23] == 255 ) begin
-		// 	   fovf = 1;
-		// 	end else begin
-		// 	   fovf = 0;
-		// 	end
-                        
-      //                   #1;
+  end
 
-      //                   // if (y !== fybit || ovf !== fovf) begin
-      //                   if (y !== fybit) begin
-      //                      $display("x1 = %b %b %b, %3d",
-		// 		    x1[31], x1[30:23], x1[22:0], x1[30:23]);
-      //                      $display("x2 = %b %b %b, %3d",
-		// 		    x2[31], x2[30:23], x2[22:0], x2[30:23]);
-      //                      // DEBUG:
-      //                      // $display("ps = %b, sr = %b, sl = %b, cr = %b", ps, sr, sl, cr);
-      //                      // $display("man1 = %b %b", man1[55:28], man1[27:0]);
-      //                      // $display("man2 = %b %b", man2[55:28], man2[27:0]);
-      //                      // $display("man3 = %b %b", man3[55:28], man3[27:0]);
-      //                      // $display("%e %b,%3d,%b %b", fy,
-		// 		    fybit[31], fybit[30:23], fybit[22:0], fovf);
-      //                      $display("%e %b,%3d,%b %b\n", $bitstoshortreal(y),
-		// 		    y[31], y[30:23], y[22:0], ovf);
+end
 
-      //                   end
-      //                end
-      //             end
-      //          end
-      //       end
-      //    end
-      //    //$finish;
-      // end
-
-      // for (i=0; i<255; i++) begin
-      //    for (s1=0; s1<2; s1++) begin
-      //       for (s2=0; s2<2; s2++) begin
-      //          for (j=0;j<23;j++) begin
-      //             repeat(10) begin
-      //                #1;
-
-      //                {m1,dum1} = $urandom();
-      //                x1i = {s1[0],i[7:0],m1};
-      //                {m2,dum2} = $urandom();
-      //                for (k=0;k<j;k++) begin
-      //                   tm[k] = m2[k];
-      //                end
-      //                for (k=j;k<23;k++) begin
-      //                   tm[k] = m1[k];
-      //                end
-      //                x2i = {s2[0],i[7:0],tm};
-
-      //                fx1 = $bitstoshortreal(x1i);
-      //                fx2 = $bitstoshortreal(x2i);
-      //                fy = fx1 + fx2;
-      //                fybit = $shortrealtobits(fy);
-                     
-		//      checkovf = i < 255;
-		//      if (checkovf && fybit[30:23] == 255) begin
-		// 	fovf = 1;
-		//      end else begin
-		// 	fovf = 0;
-		//      end
-
-      //                #1;
-
-      //                if (y !== fybit || ovf !== fovf) begin
-      //                   $display("x1 = %b %b %b, %3d",
-		// 		 x1[31], x1[30:23], x1[22:0], x1[30:23]);
-      //                   $display("x2 = %b %b %b, %3d",
-		// 		 x2[31], x2[30:23], x2[22:0], x2[30:23]);
-      //                   $display("%e %b,%3d,%b %b", fy,
-		// 		 fybit[31], fybit[30:23], fybit[22:0], fovf);
-      //                   $display("%e %b,%3d,%b %b\n", $bitstoshortreal(y),
-		// 		 y[31], y[30:23], y[22:0], ovf);
-      //                end
-      //             end
-      //          end
-      //       end
-      //    end
-      // end
-
-      $display("end of checking module fadd");
-      $display("counter: %d", counter);
-      //$finish;
-   end
 endmodule
-
-`default_nettype wire

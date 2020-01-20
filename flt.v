@@ -4,9 +4,13 @@ module flt(
   output wire b
 );
 
+wire ss, tt;
+assign ss = (s == {1'b1, 31'b0}) ? 32'b0 : s;
+assign tt = (t == {1'b1, 31'b0}) ? 32'b0 : t;
+
 assign b =
-  (s[31:31] == t[31:31]) ? (s[30:0] < t[30:0]) :
-  (s[31:31] > t[31:31]) ? 1'b1 :
+  (ss[31:31] == tt[31:31]) ? (ss[30:0] < tt[30:0]) :
+  (ss[31:31] > tt[31:31]) ? 1'b1 :
   1'b0;
 
 endmodule

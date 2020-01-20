@@ -28,7 +28,7 @@ module finv(
 );  
 
 ### FSqrt
-module fsqrt(  
+module fsqrt(
     input wire [31:0] s,  
     output wire [31:0] d  
 );  
@@ -36,8 +36,9 @@ module fsqrt(
 ## メモ
 
 ### DONE:
-- fadd, fmul, finv, fsqrtを作成した
+- 非正規化数処理を省いたFPUを作成した(fadd, fmul, floor, ftoi, itof, fneg, fabs, feq, flt)
 
 ### TODO:
-- 仕様を満たす範囲内で処理を簡略化する
-- 必要ならば他のモジュールも作成する
+- 非正規化数処理を省いたFPUを作成する(finv, fsqrt)
+- 非正規化数を0と思って処理するようにする(できるだけ非自明な動作を避ける)
+- finv, fsqrtなどを分割する
