@@ -42,7 +42,7 @@ initial begin
   one_real = 1.0;
   one_logic = $shortrealtobits(one_real);
   for (i=1; i<255; i++) begin
-    for (j=0; j<10000; j++) begin
+    for (j=0; j<100; j++) begin
 
       // NOTE: 入出力を決める
       random = $urandom();
@@ -67,12 +67,12 @@ initial begin
       #1;
 
       // NOTE: DEBUG:のために表示する
-      if (ans[31:10] != dest[31:10] && src[30:23] > 8'd0 && src[30:23] < 8'd255) begin
+      // if (ans[31:10] != dest[31:10] && src[30:23] > 8'd0 && src[30:23] < 8'd255) begin
         $display(" src = %b %b %b", src[31:31], src[30:23], src[22:0]);
         $display("dest = %b %b %b", dest[31:31], dest[30:23], dest[22:0]);
         $display(" ans = %b %b %b", ans[31:31], ans[30:23], ans[22:0]);
         $display();
-      end
+      // end
     end
   end
 

@@ -28,6 +28,11 @@ fsqrt:
 	xelab -debug typical fsqrt_testbench -s fsqrt_testbench.sim
 	xsim --runall fsqrt_testbench.sim
 
+debug:
+	xvlog --sv finv_testbench.sv finv_debug.v
+	xelab -debug typical finv_testbench -s finv_testbench.sim
+	xsim --runall finv_testbench.sim
+
 ftoi:
 	xvlog --sv ftoi_testbench.sv ftoi.v
 	xelab -debug typical ftoi_testbench -s ftoi_testbench.sim
