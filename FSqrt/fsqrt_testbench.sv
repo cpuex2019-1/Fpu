@@ -86,7 +86,7 @@ initial begin
     src_logic = $urandom();
     src_real = $bitstoshortreal(src_logic);
 
-    // NOTE: clock 1 
+      // NOTE: clock 1 
       clk = !clk; #1; clk = !clk; #1;
       // NOTE: clock 2
       clk = !clk; #1; clk = !clk; #1;
@@ -107,10 +107,10 @@ initial begin
       $display(" src = %e %b %b %b", src_real, src[31:31], src[30:23], src[22:0]);
       $display("dest = %e %b %b %b", dest_real, dest[31:31], dest[30:23], dest[22:0]);
       $display(" ans = %e %b %b %b", ans_real, ans[31:31], ans[30:23], ans[22:0]);
-      $display("s1 = %b", wire_s1);
-      $display("s2 = %b", wire_s2);
-      $display("s3 = %b", wire_s3);
-      $display("s4 = %b", wire_s4);
+      $display("x1 = %b", wire_x1);
+      $display("x2 = %b", wire_x2);
+      $display("x3 = %b", wire_x3);
+      $display("x4 = %b", wire_x4);
       $display("target4 = %b", wire_target4);
       $display("b4 = %b", wire_b4);
       $display("c4 = %b", wire_c4);

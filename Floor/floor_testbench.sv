@@ -70,13 +70,13 @@ initial begin
         #1;
 
         // NOTE: DEBUG:のために表示する
-        // if (dest != ans) begin
+        if (dest != ans) begin
           $display("counter = %d", counter);
           $display(" src = %b %b %b", src[31:31], src[30:23], src[22:0]);
           $display("dest = %b %b %b", dest[31:31], dest[30:23], dest[22:0]);
           $display(" ans = %b %b %b", ans[31:31], ans[30:23], ans[22:0]);
           $display();
-        // end
+        end
 
       end
   end
