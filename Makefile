@@ -14,15 +14,9 @@ fmul:
 # 	xsim --runall fdiv_testbench.sim
 
 finv:
-	xvlog --sv finv_testbench.sv finv_debug.v
-	# xvlog --sv finv_testbench.sv finv.v
+	xvlog --sv finv_testbench.sv finv.v
 	xelab -debug typical finv_testbench -s finv_testbench.sim
 	xsim --runall finv_testbench.sim
-
-finv_original:
-	xvlog --sv finv_original_testbench.sv finv_original.v finv.v
-	xelab -debug typical finv_original_testbench -s finv_original_testbench.sim
-	xsim --runall finv_original_testbench.sim
 
 fsqrt:
 	xvlog --sv fsqrt_testbench.sv fsqrt.v
@@ -30,9 +24,9 @@ fsqrt:
 	xsim --runall fsqrt_testbench.sim
 
 debug:
-	xvlog --sv fsqrt_testbench_debug.sv fsqrt_debug.v
-	xelab -debug typical fsqrt_testbench_debug -s fsqrt_testbench_debug.sim
-	xsim --runall fsqrt_testbench_debug.sim
+	xvlog --sv debug_testbench.sv debug.v
+	xelab -debug typical fadd_testbench -s fadd_testbench.sim
+	xsim --runall fadd_testbench.sim
 
 ftoi:
 	xvlog --sv ftoi_testbench.sv ftoi.v

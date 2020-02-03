@@ -1,10 +1,28 @@
-// NOTE: 非正規化数の処理をショートカットしたFMul
-module fmul(
-    input wire [31:0] s,
-    input wire [31:0] t,
-    output wire [31:0] d,
-    output wire overflow,
-    output wire underflow
+// クロック分割したFMul(おそらく後でfmul.vにうつす)
+
+module fmul_stage1(
+  input wire [31:0] s,
+  input wire [31:0] t,
+  output wire [47:0] mantissa
+);
+
+// 先頭bitを補完する
+wire [23:0] one_mantissa_s, one_mantissa_t;
+assign one_mantissa_s = {1'b1, s[22:0]};
+assign one_mantissa_t = {1'b1, t[22:0]};
+
+// 24bitのone_mantissaどうしでMulを行う
+assign mantissa = {24'b0, one_mantissa_s} * {24'b0, one_mantissa_t};
+
+endmodule
+
+module fmul_stage2(
+  input wire [31:0] s,
+  input wire [31:0] t,
+  input wire [47:0] one_mantissa_d_48bit,
+  output wire [31:0] d,
+  output wire overflow,
+  output wire underflow
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -19,18 +37,6 @@ assign exponent_t = t[30:23];
 assign mantissa_s = s[22:0];
 assign mantissa_t = t[22:0];
 
-// 先頭bitを補完する
-wire [23:0] one_mantissa_s, one_mantissa_t;
-assign one_mantissa_s = {1'b1, mantissa_s};
-assign one_mantissa_t = {1'b1, mantissa_t};
-
-// 符号を決める
-assign sign_d = (sign_s == sign_t) ? 0 : 1;
-
-// 24bitのone_mantissaどうしでMulを行う
-wire [47:0] one_mantissa_d_48bit;
-assign one_mantissa_d_48bit = {24'b0, one_mantissa_s} * {24'b0, one_mantissa_t};
-
 // carryがあるか調べる(非正規化数になったら適切にシフトする)
 wire carry;
 assign carry = one_mantissa_d_48bit[47:47];
@@ -39,10 +45,6 @@ assign carry = one_mantissa_d_48bit[47:47];
 wire [7:0] shift;
 wire shift_left;
 wire [4:0] shift_right;
-
-assign shift_right = 5'd0;
-assign shift_left =
-    {1'b0, exponent_s} + {1'b0, exponent_t} < {1'b0, shift} + 9'd127 ? 8'd0 : shift;
 
 assign shift = 
     (one_mantissa_d_48bit[47:47] == 1'b1) ? 0 :
@@ -69,6 +71,10 @@ assign shift =
     (one_mantissa_d_48bit[26:26] == 1'b1) ? 20 :
     (one_mantissa_d_48bit[25:25] == 1'b1) ? 21 :
     (one_mantissa_d_48bit[24:24] == 1'b1) ? 22 : 23;
+
+assign shift_right = 5'd0;
+assign shift_left =
+    {1'b0, exponent_s} + {1'b0, exponent_t} < {1'b0, shift} + 9'd127 ? 8'd0 : shift;
 
 // 正規化する
 wire [47:0] tmp;
@@ -111,6 +117,7 @@ assign underflow =
     // ({1'b0, exponent_s} + {1'b0, exponent_t} < 9'b001111111 - 9'b000011000);
     {1'b0, exponent_s} + {1'b0, exponent_t} < 9'b001111111;
 
+assign sign_d = (sign_s == sign_t) ? 0 : 1;
 
 assign exponent_d =
     overflow ?
@@ -161,5 +168,45 @@ assign d =
     : underflow ?
         {sign_d, 8'd0, 23'b0} 
     : {sign_d, exponent_d, mantissa_d};
+
+endmodule
+
+/*
+module fmul_stage1(
+  input wire [31:0] s,
+  input wire [31:0] t,
+  output wire [47:0] mantissa
+);
+
+module fmul_stage2(
+  input wire [31:0] s,
+  input wire [31:0] t,
+  input wire [47:0] mantissa,
+  output wire [31:0] d
+);
+*/
+
+module fmul(
+  input wire clk,
+  input wire [31:0] s,
+  input wire [31:0] t,
+  output wire [31:0] d,
+  output wire overflow,
+  output wire underflow
+);
+
+reg [31:0] s1_reg, t1_reg, s2_reg, t2_reg;
+reg [47:0] mantissa1_reg, mantissa2_reg;
+
+fmul_stage1 u1(s, t, mantissa1_reg);
+fmul_stage2 u2(s2_reg,t2_reg,mantissa2_reg,d,overflow,underflow);
+
+always @(posedge clk) begin
+  s1_reg <= s;
+  t1_reg <= t;
+  s2_reg <= s1_reg;
+  t2_reg <= t1_reg;
+  mantissa2_reg <= mantissa1_reg;
+end
 
 endmodule

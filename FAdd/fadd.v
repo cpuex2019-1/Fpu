@@ -1,19 +1,9 @@
-// NOTE: 非正規化数の処理をショートカットしたFAdd 
-module fadd(
-    input wire [31:0] s,
-    input wire [31:0] t,
-    output wire [31:0] d,
-    output wire overflow,
-    output wire [55:0] g_56,
-    output wire [55:0] l_56,
-    output wire [26:0] d_27,
-    output wire [55:0] d_56,
-    output wire [22:0] scale,
-    output wire ulp,
-    output wire guard,
-    output wire round,
-    output wire sticky,
-    output wire flag
+module fadd_stage1(
+  input wire [31:0] s,
+  input wire [31:0] t,
+  output wire [26:0] one_mantissa_d_27bit,
+  output wire [7:0] relative_scale,
+  output wire for_sticky
 );
 
 // 符号1bit、指数8bit、仮数23bitを読み出す
@@ -50,12 +40,6 @@ assign exponent_l = s_less_than_t ? exponent_s : exponent_t;
 assign mantissa_g = s_greater_than_t ? mantissa_s : mantissa_t;
 assign mantissa_l = s_less_than_t ? mantissa_s : mantissa_t;
 
-// 後で丸めるときに使用する
-wire carry;
-// wire ulp, guard, round, sticky, flag;
-
-// 符号を決める
-assign sign_d = sign_g;
 
 // NOTE: 非正規化処理を加える
 // wire s_is_denormalized, t_is_denormalized;
@@ -93,15 +77,12 @@ assign one_mantissa_l =
 // 計算自体は27bit(先の25bitにulpとguard bitがつく)だが、round bitのためにそれ以下の桁も必要になる
 // carry + 1. + mantissa + 31bit
 // 31bitの先頭がguard bit、その次がround bit、それ以降がsticky bitになる
-wire meaningless;
-wire [7:0] relative_scale;
+
 wire [4:0] pre_shift;
 wire [55:0] one_mantissa_g_56bit, one_mantissa_l_56bit, one_mantissa_d_56bit;
 
 assign relative_scale = one_exponent_g - one_exponent_l;
-assign meaningless = relative_scale > 8'b00011001;
-// FIXME: assign pre_shift = relative_scale;
-assign pre_shift = meaningless ? 5'b11111 : relative_scale[4:0];
+assign pre_shift =  (relative_scale > 8'b00011001) ? 5'b11111 : relative_scale[4:0];
 
 assign one_mantissa_g_56bit = {one_mantissa_g, 31'b0};
 assign one_mantissa_l_56bit = {one_mantissa_l, 31'b0} >> pre_shift;
@@ -111,18 +92,81 @@ assign one_mantissa_l_56bit = {one_mantissa_l, 31'b0} >> pre_shift;
 // 減算のときのためにulp, guard bit, round bitを設定しておく
 // carry + 1. + mantissa + 31bit
 
-wire [26:0] one_mantissa_g_27bit, one_mantissa_l_27bit, one_mantissa_d_27bit;
+wire [26:0] one_mantissa_g_27bit, one_mantissa_l_27bit;
 
 assign one_mantissa_g_27bit = one_mantissa_g_56bit[55:29];
 assign one_mantissa_l_27bit = one_mantissa_l_56bit[55:29];
 assign one_mantissa_d_27bit =
   is_add ? one_mantissa_g_27bit + one_mantissa_l_27bit : one_mantissa_g_27bit - one_mantissa_l_27bit;
 
+assign for_sticky = |(one_mantissa_l_56bit[28:0]);
+
+endmodule
+
+
+module fadd_stage2(
+  input wire [31:0] s,
+  input wire [31:0] t,
+  input wire [26:0] one_mantissa_d_27bit,
+  input wire [7:0] relative_scale,
+  input wire for_sticky,
+  output wire [31:0] d,
+  output wire overflow
+);
+
+// 符号1bit、指数8bit、仮数23bitを読み出す
+wire [0:0] sign_s, sign_t, sign_d;
+wire [7:0] exponent_s, exponent_t, exponent_d;
+wire [22:0] mantissa_s, mantissa_t, mantissa_d;
+
+assign sign_s = s[31:31];
+assign sign_t = t[31:31];
+assign exponent_s = s[30:23];
+assign exponent_t = t[30:23];
+assign mantissa_s = s[22:0];
+assign mantissa_t = t[22:0];
+
+// sとtでどちらが絶対値が大きいか調べる
+wire s_greater_than_t, s_less_than_t;
+assign s_greater_than_t = ({exponent_s, mantissa_s} > {exponent_t, mantissa_t}) ? 1 : 0;
+assign s_less_than_t = ({exponent_s, mantissa_s} < {exponent_t, mantissa_t}) ? 1 : 0;
+
+// 加算か減算か調べる
+wire is_add, is_sub;
+assign is_add = sign_s == sign_t ? 1 : 0;
+assign is_sub = sign_s != sign_t ? 1 : 0;
+
+// sとtで大きいほうをgreater、小さいほうをlessとして扱う
+wire [0:0] sign_g, sign_l;
+wire [7:0] exponent_g, exponent_l;
+wire [22:0] mantissa_g, mantissa_l;
+
+assign sign_g = s_greater_than_t ? sign_s : sign_t;
+assign sign_l = s_less_than_t ? sign_s : sign_t;
+assign exponent_g = s_greater_than_t ? exponent_s : exponent_t;
+assign exponent_l = s_less_than_t ? exponent_s : exponent_t;
+assign mantissa_g = s_greater_than_t ? mantissa_s : mantissa_t;
+assign mantissa_l = s_less_than_t ? mantissa_s : mantissa_t;
+
+// NOTE: 修正した指数をつくる
+wire [7:0] one_exponent_s, one_exponent_t;
+wire [7:0] one_exponent_g, one_exponent_l;
+assign one_exponent_g =
+    // g_is_denormalized ? exponent_g + 8'b1 : 
+    exponent_g;
+assign one_exponent_l =
+    // l_is_denormalized ? exponent_l + 8'b1 :
+    exponent_l;
+
 // 正規化を行う
 wire shift_right;
 wire [4:0] shift_left, shift;
 wire [55:0] one_mantissa_d_scaled;
 wire [22:0] mantissa_d_scaled;
+
+// 後で丸めるときに使用する
+wire carry;
+wire ulp, guard, round, sticky, flag;
 
 // 減算ならば最上位から1を探す
 // それまでに出た0の数だけ<<する
@@ -161,6 +205,7 @@ assign shift_left =
 
 wire [55:0] d_concat_l;
 wire [55:0] d_concat_l_shift;
+wire [55:0] one_mantissa_d_56bit;
 // FIXME:
 assign d_concat_l =
   { one_mantissa_d_27bit, 29'd0 };
@@ -179,11 +224,11 @@ assign one_mantissa_d_scaled =
     one_mantissa_d_56bit[53:31];
 
 // DEBUG:
-assign g_56 = one_mantissa_g_56bit;
-assign l_56 = one_mantissa_l_56bit;
-assign d_27 = one_mantissa_d_27bit;
-assign d_56 = one_mantissa_d_56bit;
-assign scale = one_mantissa_d_scaled;
+// assign g_56 = one_mantissa_g_56bit;
+// assign l_56 = one_mantissa_l_56bit;
+// assign d_27 = one_mantissa_d_27bit;
+// assign d_56 = one_mantissa_d_56bit;
+// assign scale = one_mantissa_d_scaled;
 
 // 正規化のためだけに56bitに拡張する
 // 正規化後は必ず下位28bitの先頭が1になる(最下位２bitは後で丸めるときに使う)
@@ -202,7 +247,7 @@ assign round = one_mantissa_d_56bit[29:29];
 // assign round = one_mantissa_d_27bit[0:0];
 // assign sticky = |(one_mantissa_d_56bit[28:0]) || (carry && round);
 // NOTE: carry=1のときには右shiftするが、その際に落ちたbitを考慮に入れる
-assign sticky = |(one_mantissa_l_56bit[28:0]) || (carry && one_mantissa_d_27bit[0:0]);
+assign sticky = for_sticky || (carry && one_mantissa_d_27bit[0:0]);
 
 assign flag =
     (ulp && guard && (~round) && (~sticky)) ||
@@ -223,6 +268,10 @@ assign carry_round = mantissa_d_rounded[23:23];
 // inf - inf = NaN
 // Nan +/- * = NaN (as is the reverse)
 
+// 符号を決める
+assign sign_d = sign_g;
+
+// 指数を決める
 assign exponent_d =
 is_add ? 
     one_exponent_g + {7'b0, shift_right} + {7'b0, carry_round}
@@ -297,3 +346,47 @@ assign overflow =
 
 endmodule
 
+/*
+module fadd_stage1(
+  input wire [31:0] s,
+  input wire [31:0] t,
+  output wire [26:0] one_mantissa_d_27bit
+);
+
+module fadd_stage2(
+  input wire [31:0] s,
+  input wire [31:0] t,
+  input wire [26:0] one_mantissa_d_27bit
+  output wire [31:0] d,
+  output wire overflow
+);
+*/
+
+module fadd(
+  input wire clk,
+  input wire [31:0] s,
+  input wire [31:0] t,
+  output wire [31:0] d,
+  output wire overflow,
+  output wire underflow
+);
+
+reg [31:0] s1_reg, t1_reg, s2_reg, t2_reg;
+reg sticky1_reg, sticky2_reg;
+reg [26:0] mantissa1_reg, mantissa2_reg;
+reg [7:0] scale1_reg, scale2_reg;
+
+fadd_stage1 u1(s, t, mantissa1_reg, scale1_reg, sticky1_reg);
+fadd_stage2 u2(s2_reg,t2_reg,mantissa2_reg,scale2_reg,sticky2_reg,d,overflow);
+
+always @(posedge clk) begin
+  s1_reg <= s;
+  t1_reg <= t;
+  s2_reg <= s1_reg;
+  t2_reg <= t1_reg;
+  mantissa2_reg <= mantissa1_reg;
+  scale2_reg <= scale1_reg;
+  sticky2_reg <= sticky1_reg;
+end
+
+endmodule

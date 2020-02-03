@@ -1,7 +1,7 @@
 `timescale 1ns / 100ps
 `default_nettype none
 
-module fmul_testbench();
+module fmul_testbench_debug();
 
 wire [31:0] src, sink, dest;
 logic [31:0] src_logic, sink_logic, dest_logic;
@@ -16,9 +16,33 @@ int random;
 logic sign_src_logic, sign_sink_logic;
 logic [7:0] exp_src_logic, exp_sink_logic;
 logic [22:0] man_src_logic, man_sink_logic;
+logic clk, overflow, underflow;
 
-wire ulp,guard,round,sticky,flag;
-fmul u0(src,sink,dest,ovf,udf);
+// wire ulp,guard,round,sticky,flag;
+fmul u0(clk,src,sink,dest,overflow,underflow);
+
+// DEBUG:
+logic [31:0] s, t, d;
+logic [31:0] s1_reg, t1_reg, s2_reg, t2_reg;
+logic [47:0] mantissa1_reg, mantissa2_reg;
+wire z1,z2;
+wire [47:0] one_mantissa_d_scaled;
+wire [4:0] shift_right;
+wire [7:0] shift_left;
+wire [23:0] one_mantissa_d_24bit;
+
+fmul_stage1 u1(s, t, mantissa1_reg);
+fmul_stage2 u2(s2_reg,t2_reg,mantissa2_reg,d,z1,z2);
+assign s = src;
+assign t = sink;
+always @(posedge clk) begin
+  s1_reg <= s;
+  t1_reg <= t;
+  s2_reg <= s1_reg;
+  t2_reg <= t1_reg;
+  mantissa2_reg <= mantissa1_reg;
+end
+// DEBUG:
 
 // NOTE: wireをlogicにつないでおき、initial文の中でlogicに代入する
 // assign src = {sign_src, exp_src, man_src};
@@ -51,10 +75,12 @@ end
 
 // NOTE: テスト内容を記述する
 initial begin
-  for (i=1; i<255; i++) begin
-    for (j=1; j<255; j++) begin
+  clk = 0;
 
-      for (k=0; k<100; k++) begin
+  for (i=120; i<150; i++) begin
+    for (j=120; j<150; j++) begin
+
+      for (k=0; k<10; k++) begin
         counter = counter + 1;
         random = $urandom % 10;
 
@@ -108,27 +134,27 @@ initial begin
 
         #1;
 
+          // NOTE: clock 1 
+        clk = !clk; #1; clk = !clk; #1;
+        // NOTE: clock 2
+        clk = !clk; #1; clk = !clk; #1;
+
+        #1;
+
         ans_real = src_real * sink_real;
         ans_logic = $shortrealtobits(ans_real);
 
         #1;
 
         // NOTE: DEBUG:のために表示する
-        if ((dest[30:23] != 0 && ans[30:23] != 0 && dest != ans) || (dest[30:23] == 0 && ans[30:23] != 0) || (dest[30:23] != 0 && ans[30:23] == 0)) begin
-          $display("counter = %d", counter);
-          $display("overflow(%b) underflow(%b)", ovf, udf);
-          // $display("g_56 = %b %b %b %b %b %b %b", g_56[55:48], g_56[47:40], g_56[39:32], g_56[31:24], g_56[23:16], g_56[15:8], g_56[7:0]);
-          // $display("l_56 = %b %b %b %b %b %b %b", l_56[55:48], l_56[47:40], l_56[39:32], l_56[31:24], l_56[23:16], l_56[15:8], l_56[7:0]);
-          // $display("d_27 = %b %b %b %b %b %b %b", d_27[26:19], d_27[18:11], d_27[10:3], {d_27[2:0], 5'd0}, 8'd0, 8'd0, 8'd0);
-          // $display("d_56 = %b %b %b %b %b %b %b", d_56[55:48], d_56[47:40], d_56[39:32], d_56[31:24], d_56[23:16], d_56[15:8], d_56[7:0]);
-          // $display("scale = %b", scale);
+        // if ((dest[30:23] != 0 && ans[30:23] != 0 && dest != ans) || (dest[30:23] == 0 && ans[30:23] != 0) || (dest[30:23] != 0 && ans[30:23] == 0)) begin
+          $display("overflow(%b) underflow(%b)", overflow, underflow);
           $display(" src = %b %b %b", src[31:31], src[30:23], src[22:0]);
           $display("sink = %b %b %b", sink[31:31], sink[30:23], sink[22:0]);
           $display("dest = %b %b %b", dest[31:31], dest[30:23], dest[22:0]);
           $display(" ans = %b %b %b", ans[31:31], ans[30:23], ans[22:0]);
           $display();
-        end
-
+        // end
       end
     end
   end
