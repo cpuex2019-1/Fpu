@@ -9,44 +9,14 @@ shortreal src_real, sink_real, dest_real;
 wire [31:0] ans;
 logic [31:0] ans_logic;
 shortreal ans_real;
-wire ovf, udf;
+wire ovf;
 int counter;
 int random;
 
 logic sign_src_logic, sign_sink_logic;
 logic [7:0] exp_src_logic, exp_sink_logic;
 logic [22:0] man_src_logic, man_sink_logic;
-logic clk, overflow, underflow;
-
-// wire ulp,guard,round,sticky,flag;
-fadd u0(clk,src,sink,dest,overflow);
-
-// DEBUG:
-logic [31:0] s, t, d;
-logic [31:0] s1_reg, t1_reg, s2_reg, t2_reg;
-logic sticky1_reg, sticky2_reg;
-logic [26:0] mantissa1_reg, mantissa2_reg;
-logic [7:0] scale1_reg, scale2_reg;
-wire z1,z2;
-wire [47:0] one_mantissa_d_scaled;
-wire [4:0] shift_right;
-wire [7:0] shift_left;
-wire [23:0] one_mantissa_d_24bit;
-
-fadd_stage1 u1(s, t, mantissa1_reg, scale1_reg, sticky1_reg);
-fadd_stage2 u2(s2_reg,t2_reg,mantissa2_reg,scale2_reg,sticky2_reg,d,z1);
-assign s = src;
-assign t = sink;
-always @(posedge clk) begin
-  s1_reg <= s;
-  t1_reg <= t;
-  s2_reg <= s1_reg;
-  t2_reg <= t1_reg;
-  mantissa2_reg <= mantissa1_reg;
-  scale2_reg <= scale1_reg;
-  sticky2_reg <= sticky1_reg;
-end
-// DEBUG:
+logic clk, overflow;
 
 // NOTE: wireをlogicにつないでおき、initial文の中でlogicに代入する
 // assign src = {sign_src, exp_src, man_src};
@@ -70,7 +40,9 @@ assign ans = ans_logic;
 assign src = {sign_src, exp_src, man_src};
 assign sink = {sign_sink, exp_sink, man_sink};
 
-// NOTE: 必要になった変数はここに
+fadd u0(clk, src, sink, dest);
+
+
 int i, j, k;
 
 initial begin
@@ -81,8 +53,8 @@ end
 initial begin
   clk = 0;
 
-  for (i=100; i<200; i++) begin
-    for (j=100; j<200; j++) begin
+  for (i=120; i<130; i++) begin
+    for (j=120; j<130; j++) begin
 
       for (k=0; k<10; k++) begin
         counter = counter + 1;
@@ -142,6 +114,8 @@ initial begin
         clk = !clk; #1; clk = !clk; #1;
         // NOTE: clock 2
         clk = !clk; #1; clk = !clk; #1;
+        // NOTE: clock 3
+        clk = !clk; #1; clk = !clk; #1;
 
         #1;
 
@@ -151,14 +125,13 @@ initial begin
         #1;
 
         // NOTE: DEBUG:のために表示する
-        if ((dest[30:23] != 0 && ans[30:23] != 0 && dest != ans) || (dest[30:23] == 0 && ans[30:23] != 0) || (dest[30:23] != 0 && ans[30:23] == 0)) begin
-          $display("overflow(%b)", overflow);
+        // if ((dest[30:23] != 0 && ans[30:23] != 0 && dest != ans) || (dest[30:23] == 0 && ans[30:23] != 0) || (dest[30:23] != 0 && ans[30:23] == 0)) begin
           $display(" src = %b %b %b", src[31:31], src[30:23], src[22:0]);
           $display("sink = %b %b %b", sink[31:31], sink[30:23], sink[22:0]);
           $display("dest = %b %b %b", dest[31:31], dest[30:23], dest[22:0]);
           $display(" ans = %b %b %b", ans[31:31], ans[30:23], ans[22:0]);
           $display();
-        end
+        // end
       end
     end
   end
